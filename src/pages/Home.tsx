@@ -482,6 +482,22 @@ function DashboardScreen({
   clerkNotes: string
   onClerkNotesChange: (notes: string) => void
 }) {
+  // Add defensive checks for nested properties
+  if (!result?.result?.validation_results || !result?.result?.extraction_results) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
+        <Card className="w-full max-w-md bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white">Loading Results...</CardTitle>
+            <CardDescription className="text-slate-400">
+              Please wait while we process the verification data
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    )
+  }
+
   const { validation_results, extraction_results, final_decision, processing_summary } = result.result
 
   const packetId = `WP-${new Date().getTime().toString().slice(-8)}`
