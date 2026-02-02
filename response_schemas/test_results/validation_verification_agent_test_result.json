@@ -1,0 +1,94 @@
+{
+  "agent_name": "Validation & Verification Agent",
+  "agent_id": "6980b39ad36f070193f61fc5",
+  "test_message": "Validate extracted data: accounts=[1234567890, 9876543210, 9876543210], amount=250000, signatures_detected=1, required_signatures=2. Check rules: account consistency, signature requirements for amount >$100k, ABA routing validity.",
+  "expected_purpose": "validation",
+  "timestamp": "2026-02-02T14:29:06.951344",
+  "is_valid_json": true,
+  "validation_errors": [],
+  "actual_response": {
+    "status": "success",
+    "result": {
+      "overall_validation_status": "FAIL",
+      "validation_summary": {
+        "total_rules_checked": 3,
+        "passed": 0,
+        "failed": 3,
+        "flagged": 0
+      },
+      "validation_rules": [
+        {
+          "rule_id": "account_consistency",
+          "rule_name": "Account Number Consistency",
+          "status": "FAIL",
+          "severity": "critical",
+          "message": "Inconsistent account numbers found across documents: [1234567890, 9876543210, 9876543210]. All documents must reference the same account number.",
+          "deep_link": "https://docreview.app/documents/account_fields?docs=1,2,3",
+          "affected_documents": [
+            "1",
+            "2",
+            "3"
+          ],
+          "remediation": "Ensure all related documents reference the correct, consistent account number throughout."
+        },
+        {
+          "rule_id": "signature_count",
+          "rule_name": "Signature Requirements for Transfers >$100,000",
+          "status": "FAIL",
+          "severity": "critical",
+          "message": "Only 1 signature detected, but 3 signatures plus manager approval are required for transfers exceeding $100,000 (current amount: $250,000).",
+          "deep_link": "https://docreview.app/documents/signatures?docs=1,2,3",
+          "affected_documents": [
+            "1",
+            "2",
+            "3"
+          ],
+          "remediation": "Obtain the required 3 signatures and manager approval and update the documents accordingly."
+        },
+        {
+          "rule_id": "aba_routing_validity",
+          "rule_name": "ABA Routing Number Validity",
+          "status": "FAIL",
+          "severity": "critical",
+          "message": "ABA routing validity check not possible: routing numbers not provided in the extracted data.",
+          "deep_link": "https://docreview.app/documents/routing_fields?docs=1,2,3",
+          "affected_documents": [
+            "1",
+            "2",
+            "3"
+          ],
+          "remediation": "Extract and validate the ABA routing numbers. Ensure routing numbers are present and pass standard checksum validation."
+        }
+      ],
+      "compliance_checks": {
+        "signature_requirements": {
+          "required": 3,
+          "found": 1,
+          "status": "FAIL"
+        },
+        "amount_limits": {
+          "transfer_amount": 250000,
+          "daily_limit": null,
+          "remaining_limit": null,
+          "status": "FLAG"
+        },
+        "account_verification": {
+          "accounts_validated": 3,
+          "consistency_check": "FAIL"
+        }
+      },
+      "recommendations": [
+        "Correct the account numbers to ensure consistency across all documents.",
+        "Obtain 3 signatures and manager approval as required for this transfer amount.",
+        "Extract and verify ABA routing numbers to complete compliance checks.",
+        "Review and update the daily transfer limit information to finalize validation."
+      ]
+    },
+    "metadata": {
+      "agent_name": "Validation & Verification Agent",
+      "timestamp": "2024-06-14T11:16:45Z",
+      "validation_time_ms": 75
+    }
+  },
+  "raw_response": "{\n  \"status\": \"success\",\n  \"result\": {\n    \"overall_validation_status\": \"FAIL\",\n    \"validation_summary\": {\n      \"total_rules_checked\": 3,\n      \"passed\": 0,\n      \"failed\": 3,\n      \"flagged\": 0\n    },\n    \"validation_rules\": [\n      {\n        \"rule_id\": \"account_consistency\",\n        \"rule_name\": \"Account Number Consistency\",\n        \"status\": \"FAIL\",\n        \"severity\": \"critical\",\n        \"message\": \"Inconsistent account numbers found across documents: [1234567890, 9876543210, 9876543210]. All documents must reference the same account number.\",\n        \"deep_link\": \"https://docreview.app/documents/account_fields?docs=1,2,3\",\n        \"affected_documents\": [\"1\", \"2\", \"3\"],\n        \"remediation\": \"Ensure all related documents reference the correct, consistent account number throughout.\"\n      },\n      {\n        \"rule_id\": \"signature_count\",\n        \"rule_name\": \"Signature Requirements for Transfers >$100,000\",\n        \"status\": \"FAIL\",\n        \"severity\": \"critical\",\n        \"message\": \"Only 1 signature detected, but 3 signatures plus manager approval are required for transfers exceeding $100,000 (current amount: $250,000).\",\n        \"deep_link\": \"https://docreview.app/documents/signatures?docs=1,2,3\",\n        \"affected_documents\": [\"1\", \"2\", \"3\"],\n        \"remediation\": \"Obtain the required 3 signatures and manager approval and update the documents accordingly.\"\n      },\n      {\n        \"rule_id\": \"aba_routing_validity\",\n        \"rule_name\": \"ABA Routing Number Validity\",\n        \"status\": \"FAIL\",\n        \"severity\": \"critical\",\n        \"message\": \"ABA routing validity check not possible: routing numbers not provided in the extracted data.\",\n        \"deep_link\": \"https://docreview.app/documents/routing_fields?docs=1,2,3\",\n        \"affected_documents\": [\"1\", \"2\", \"3\"],\n        \"remediation\": \"Extract and validate the ABA routing numbers. Ensure routing numbers are present and pass standard checksum validation.\"\n      }\n    ],\n    \"compliance_checks\": {\n      \"signature_requirements\": {\n        \"required\": 3,\n        \"found\": 1,\n        \"status\": \"FAIL\"\n      },\n      \"amount_limits\": {\n        \"transfer_amount\": 250000,\n        \"daily_limit\": null,\n        \"remaining_limit\": null,\n        \"status\": \"FLAG\"\n      },\n      \"account_verification\": {\n        \"accounts_validated\": 3,\n        \"consistency_check\": \"FAIL\"\n      }\n    },\n    \"recommendations\": [\n      \"Correct the account numbers to ensure consistency across all documents.\",\n      \"Obtain 3 signatures and manager approval as required for this transfer amount.\",\n      \"Extract and verify ABA routing numbers to complete compliance checks.\",\n      \"Review and update the daily transfer limit information to finalize validation.\"\n    ]\n  },\n  \"metadata\": {\n    \"agent_name\": \"Validation & Verification Agent\",\n    \"timestamp\": \"2024-06-14T11:16:45Z\",\n    \"validation_time_ms\": 75\n  }\n}"
+}

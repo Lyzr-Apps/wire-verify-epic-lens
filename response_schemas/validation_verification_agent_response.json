@@ -1,0 +1,229 @@
+{
+  "agent_name": "Validation & Verification Agent",
+  "agent_id": "6980b39ad36f070193f61fc5",
+  "agent_purpose": "analyzer",
+  "description": "Validates wire transfer data against compliance rules including account consistency, signature requirements, and limit checks, returning PASS/FAIL/FLAG classifications with deep links to issues",
+  "response_schema": {
+    "status": "string",
+    "result": {
+      "overall_validation_status": "string",
+      "validation_summary": {
+        "total_rules_checked": "number",
+        "passed": "number",
+        "failed": "number",
+        "flagged": "number"
+      },
+      "validation_rules": [
+        {
+          "rule_id": "string",
+          "rule_name": "string",
+          "status": "string",
+          "severity": "string",
+          "message": "string",
+          "deep_link": "string",
+          "affected_documents": [
+            "string"
+          ],
+          "remediation": "string"
+        }
+      ],
+      "compliance_checks": {
+        "signature_requirements": {
+          "required": "number",
+          "found": "number",
+          "status": "string"
+        },
+        "amount_limits": {
+          "transfer_amount": "number",
+          "daily_limit": "null",
+          "remaining_limit": "null",
+          "status": "string"
+        },
+        "account_verification": {
+          "accounts_validated": "number",
+          "consistency_check": "string"
+        }
+      },
+      "recommendations": [
+        "string"
+      ]
+    },
+    "metadata": {
+      "agent_name": "string",
+      "timestamp": "string",
+      "validation_time_ms": "number"
+    }
+  },
+  "example_response": {
+    "status": "success",
+    "result": {
+      "overall_validation_status": "FAIL",
+      "validation_summary": {
+        "total_rules_checked": 3,
+        "passed": 0,
+        "failed": 3,
+        "flagged": 0
+      },
+      "validation_rules": [
+        {
+          "rule_id": "account_consistency",
+          "rule_name": "Account Number Consistency",
+          "status": "FAIL",
+          "severity": "critical",
+          "message": "Inconsistent account numbers found across documents: [1234567890, 9876543210, 9876543210]. All documents must reference the same account number.",
+          "deep_link": "https://docreview.app/documents/account_fields?docs=1,2,3",
+          "affected_documents": [
+            "1",
+            "2",
+            "3"
+          ],
+          "remediation": "Ensure all related documents reference the correct, consistent account number throughout."
+        },
+        {
+          "rule_id": "signature_count",
+          "rule_name": "Signature Requirements for Transfers >$100,000",
+          "status": "FAIL",
+          "severity": "critical",
+          "message": "Only 1 signature detected, but 3 signatures plus manager approval are required for transfers exceeding $100,000 (current amount: $250,000).",
+          "deep_link": "https://docreview.app/documents/signatures?docs=1,2,3",
+          "affected_documents": [
+            "1",
+            "2",
+            "3"
+          ],
+          "remediation": "Obtain the required 3 signatures and manager approval and update the documents accordingly."
+        },
+        {
+          "rule_id": "aba_routing_validity",
+          "rule_name": "ABA Routing Number Validity",
+          "status": "FAIL",
+          "severity": "critical",
+          "message": "ABA routing validity check not possible: routing numbers not provided in the extracted data.",
+          "deep_link": "https://docreview.app/documents/routing_fields?docs=1,2,3",
+          "affected_documents": [
+            "1",
+            "2",
+            "3"
+          ],
+          "remediation": "Extract and validate the ABA routing numbers. Ensure routing numbers are present and pass standard checksum validation."
+        }
+      ],
+      "compliance_checks": {
+        "signature_requirements": {
+          "required": 3,
+          "found": 1,
+          "status": "FAIL"
+        },
+        "amount_limits": {
+          "transfer_amount": 250000,
+          "daily_limit": null,
+          "remaining_limit": null,
+          "status": "FLAG"
+        },
+        "account_verification": {
+          "accounts_validated": 3,
+          "consistency_check": "FAIL"
+        }
+      },
+      "recommendations": [
+        "Correct the account numbers to ensure consistency across all documents.",
+        "Obtain 3 signatures and manager approval as required for this transfer amount.",
+        "Extract and verify ABA routing numbers to complete compliance checks.",
+        "Review and update the daily transfer limit information to finalize validation."
+      ]
+    },
+    "metadata": {
+      "agent_name": "Validation & Verification Agent",
+      "timestamp": "2024-06-14T11:16:45Z",
+      "validation_time_ms": 75
+    }
+  },
+  "is_actual_tested": true,
+  "test_timestamp": "2026-02-02T14:29:06.953975",
+  "test_message_used": "Analyze this sample data for testing",
+  "actual_test_response": {
+    "status": "success",
+    "result": {
+      "overall_validation_status": "FAIL",
+      "validation_summary": {
+        "total_rules_checked": 3,
+        "passed": 0,
+        "failed": 3,
+        "flagged": 0
+      },
+      "validation_rules": [
+        {
+          "rule_id": "account_consistency",
+          "rule_name": "Account Number Consistency",
+          "status": "FAIL",
+          "severity": "critical",
+          "message": "Inconsistent account numbers found across documents: [1234567890, 9876543210, 9876543210]. All documents must reference the same account number.",
+          "deep_link": "https://docreview.app/documents/account_fields?docs=1,2,3",
+          "affected_documents": [
+            "1",
+            "2",
+            "3"
+          ],
+          "remediation": "Ensure all related documents reference the correct, consistent account number throughout."
+        },
+        {
+          "rule_id": "signature_count",
+          "rule_name": "Signature Requirements for Transfers >$100,000",
+          "status": "FAIL",
+          "severity": "critical",
+          "message": "Only 1 signature detected, but 3 signatures plus manager approval are required for transfers exceeding $100,000 (current amount: $250,000).",
+          "deep_link": "https://docreview.app/documents/signatures?docs=1,2,3",
+          "affected_documents": [
+            "1",
+            "2",
+            "3"
+          ],
+          "remediation": "Obtain the required 3 signatures and manager approval and update the documents accordingly."
+        },
+        {
+          "rule_id": "aba_routing_validity",
+          "rule_name": "ABA Routing Number Validity",
+          "status": "FAIL",
+          "severity": "critical",
+          "message": "ABA routing validity check not possible: routing numbers not provided in the extracted data.",
+          "deep_link": "https://docreview.app/documents/routing_fields?docs=1,2,3",
+          "affected_documents": [
+            "1",
+            "2",
+            "3"
+          ],
+          "remediation": "Extract and validate the ABA routing numbers. Ensure routing numbers are present and pass standard checksum validation."
+        }
+      ],
+      "compliance_checks": {
+        "signature_requirements": {
+          "required": 3,
+          "found": 1,
+          "status": "FAIL"
+        },
+        "amount_limits": {
+          "transfer_amount": 250000,
+          "daily_limit": null,
+          "remaining_limit": null,
+          "status": "FLAG"
+        },
+        "account_verification": {
+          "accounts_validated": 3,
+          "consistency_check": "FAIL"
+        }
+      },
+      "recommendations": [
+        "Correct the account numbers to ensure consistency across all documents.",
+        "Obtain 3 signatures and manager approval as required for this transfer amount.",
+        "Extract and verify ABA routing numbers to complete compliance checks.",
+        "Review and update the daily transfer limit information to finalize validation."
+      ]
+    },
+    "metadata": {
+      "agent_name": "Validation & Verification Agent",
+      "timestamp": "2024-06-14T11:16:45Z",
+      "validation_time_ms": 75
+    }
+  },
+  "test_passed": true
+}

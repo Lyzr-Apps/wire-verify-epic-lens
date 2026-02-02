@@ -1,0 +1,125 @@
+{
+  "workflow_name": "WireGuard Verification Command Center",
+  "workflow_type": "manager-subagent",
+  "nodes": [
+    {
+      "id": "user_upload",
+      "type": "Input",
+      "label": "Wire Packet Upload",
+      "nodeCategory": "input",
+      "position": {"x": 100, "y": 200}
+    },
+    {
+      "id": "wire_verification_manager",
+      "type": "Agent",
+      "label": "Wire Verification Manager",
+      "nodeCategory": "agent",
+      "agent_id": "6980b3bf066158e77fdea70b",
+      "agent_type": "Manager",
+      "position": {"x": 400, "y": 200}
+    },
+    {
+      "id": "ocr_extraction_agent",
+      "type": "Agent",
+      "label": "Multi-Modal OCR & Extraction Agent",
+      "nodeCategory": "agent",
+      "agent_id": "6980b377066158e77fdea689",
+      "agent_type": "Sub-Agent",
+      "position": {"x": 700, "y": 100}
+    },
+    {
+      "id": "validation_agent",
+      "type": "Agent",
+      "label": "Validation & Verification Agent",
+      "nodeCategory": "agent",
+      "agent_id": "6980b39ad36f070193f61fc5",
+      "agent_type": "Sub-Agent",
+      "position": {"x": 700, "y": 300}
+    },
+    {
+      "id": "final_output",
+      "type": "Output",
+      "label": "Validation Results",
+      "nodeCategory": "end",
+      "position": {"x": 1000, "y": 200}
+    }
+  ],
+  "edges": [
+    {
+      "source": "user_upload",
+      "target": "wire_verification_manager",
+      "label": "Upload Wire Packet"
+    },
+    {
+      "source": "wire_verification_manager",
+      "target": "ocr_extraction_agent",
+      "label": "Extract Data"
+    },
+    {
+      "source": "ocr_extraction_agent",
+      "target": "validation_agent",
+      "label": "Validate"
+    },
+    {
+      "source": "validation_agent",
+      "target": "wire_verification_manager",
+      "label": "Return Results"
+    },
+    {
+      "source": "wire_verification_manager",
+      "target": "final_output",
+      "label": "Aggregated Results"
+    }
+  ],
+  "agents": [
+    {
+      "agent_id": "6980b3bf066158e77fdea70b",
+      "name": "Wire Verification Manager",
+      "type": "Manager",
+      "description": "Coordinates OCR extraction and validation workflow, orchestrates sub-agents sequentially, aggregates final validation results into unified JSON response for dashboard rendering",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "temperature": 0.2,
+      "top_p": 1,
+      "managed_agents": [
+        {
+          "id": "6980b377066158e77fdea689",
+          "name": "Multi-Modal OCR & Extraction Agent"
+        },
+        {
+          "id": "6980b39ad36f070193f61fc5",
+          "name": "Validation & Verification Agent"
+        }
+      ],
+      "response_schema": "response_schemas/wire_verification_manager_response.json"
+    },
+    {
+      "agent_id": "6980b377066158e77fdea689",
+      "name": "Multi-Modal OCR & Extraction Agent",
+      "type": "Sub-Agent",
+      "description": "Processes PDF, PNG, JPG, and fax images using vision capabilities; classifies document types; extracts structured data (account numbers, amounts, beneficiaries); detects signature presence with coordinate-level confidence scoring in signature blocks",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "temperature": 0.1,
+      "top_p": 1,
+      "response_schema": "response_schemas/multi_modal_ocr_extraction_agent_response.json"
+    },
+    {
+      "agent_id": "6980b39ad36f070193f61fc5",
+      "name": "Validation & Verification Agent",
+      "type": "Sub-Agent",
+      "description": "Receives aggregated extraction JSONs; applies cross-document validation rules (account consistency, signature requirements based on amount thresholds, limit checks); classifies each rule as PASS/FAIL/FLAG; generates deep links to offending document areas",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "temperature": 0.1,
+      "top_p": 1,
+      "response_schema": "response_schemas/validation_verification_agent_response.json"
+    }
+  ],
+  "metadata": {
+    "created_date": "2026-02-02",
+    "total_agents": 3,
+    "manager_agents": 1,
+    "sub_agents": 2
+  }
+}

@@ -1,0 +1,961 @@
+{
+  "agent_name": "Wire Verification Manager",
+  "agent_id": "6980b3bf066158e77fdea70b",
+  "agent_purpose": "manager",
+  "description": "Orchestrates complete wire transfer verification workflow, aggregating OCR extraction and validation results into unified dashboard-ready JSON response with final approval decision",
+  "response_schema": {
+    "status": "string",
+    "result": {
+      "workflow_status": "string",
+      "extraction_results": {
+        "document_type": "string",
+        "extracted_data": [
+          {
+            "document_type": "string",
+            "file_name": "string",
+            "extracted_data": {
+              "account_number": {
+                "value": "string",
+                "confidence": "number"
+              },
+              "routing_number": {
+                "value": "string",
+                "confidence": "number"
+              },
+              "transfer_amount": {
+                "value": "number",
+                "confidence": "number"
+              },
+              "beneficiary_name": {
+                "value": "string",
+                "confidence": "number"
+              },
+              "beneficiary_account": {
+                "value": "string",
+                "confidence": "number"
+              },
+              "originator_name": {
+                "value": "string",
+                "confidence": "number"
+              },
+              "date": {
+                "value": "string",
+                "confidence": "number"
+              }
+            },
+            "signature_detection": {
+              "signatures_found": "number",
+              "signatures": [
+                {
+                  "location": "string",
+                  "bounding_box": {
+                    "x": "number",
+                    "y": "number",
+                    "width": "number",
+                    "height": "number"
+                  },
+                  "confidence": "number",
+                  "type": "string"
+                }
+              ]
+            },
+            "document_quality": {
+              "clarity": "number",
+              "completeness": "number",
+              "issues": [
+                "any"
+              ]
+            }
+          }
+        ]
+      },
+      "validation_results": {
+        "overall_validation_status": "string",
+        "validation_summary": {
+          "total_rules_checked": "number",
+          "passed": "number",
+          "failed": "number",
+          "flagged": "number"
+        },
+        "validation_rules": [
+          {
+            "rule_id": "string",
+            "rule_name": "string",
+            "status": "string",
+            "severity": "string",
+            "message": "string",
+            "deep_link": "string",
+            "affected_documents": [
+              "string"
+            ],
+            "remediation": "string"
+          }
+        ],
+        "compliance_checks": {
+          "signature_requirements": {
+            "required": "number",
+            "found": "number",
+            "status": "string"
+          },
+          "amount_limits": {
+            "transfer_amount": "number",
+            "daily_limit": "null",
+            "remaining_limit": "null",
+            "status": "string"
+          },
+          "account_verification": {
+            "accounts_validated": "number",
+            "consistency_check": "string"
+          }
+        },
+        "recommendations": [
+          "string"
+        ]
+      },
+      "final_decision": {
+        "approved": "boolean",
+        "requires_manual_review": "boolean",
+        "blocking_issues": [
+          "string"
+        ],
+        "warnings": [
+          "string"
+        ]
+      },
+      "processing_summary": {
+        "total_documents_processed": "number",
+        "extraction_confidence": "number",
+        "validation_pass_rate": "number",
+        "critical_issues_count": "number"
+      }
+    },
+    "metadata": {
+      "agent_name": "string",
+      "timestamp": "string",
+      "total_processing_time_ms": "number",
+      "sub_agents_invoked": [
+        "string"
+      ]
+    }
+  },
+  "example_response": {
+    "status": "success",
+    "result": {
+      "workflow_status": "completed",
+      "extraction_results": {
+        "document_type": "wire_transfer_packet",
+        "extracted_data": [
+          {
+            "document_type": "wire_transfer_form",
+            "file_name": "wire_request.pdf",
+            "extracted_data": {
+              "account_number": {
+                "value": "9876543210",
+                "confidence": 0.98
+              },
+              "routing_number": {
+                "value": "021000021",
+                "confidence": 0.96
+              },
+              "transfer_amount": {
+                "value": 250000,
+                "confidence": 0.99
+              },
+              "beneficiary_name": {
+                "value": "ACME International Holdings",
+                "confidence": 0.92
+              },
+              "beneficiary_account": {
+                "value": "9876543210",
+                "confidence": 0.98
+              },
+              "originator_name": {
+                "value": "John Doe",
+                "confidence": 0.95
+              },
+              "date": {
+                "value": "2024-06-18",
+                "confidence": 0.96
+              }
+            },
+            "signature_detection": {
+              "signatures_found": 1,
+              "signatures": [
+                {
+                  "location": "bottom_right",
+                  "bounding_box": {
+                    "x": 420,
+                    "y": 1200,
+                    "width": 310,
+                    "height": 90
+                  },
+                  "confidence": 0.97,
+                  "type": "handwritten"
+                }
+              ]
+            },
+            "document_quality": {
+              "clarity": 0.97,
+              "completeness": 1.0,
+              "issues": []
+            }
+          },
+          {
+            "document_type": "authorization_letter",
+            "file_name": "authorization_form.pdf",
+            "extracted_data": {
+              "account_number": {
+                "value": "1234567890",
+                "confidence": 0.91
+              },
+              "routing_number": {
+                "value": "026009593",
+                "confidence": 0.9
+              },
+              "transfer_amount": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_name": {
+                "value": "ACME International Holdings",
+                "confidence": 0.9
+              },
+              "beneficiary_account": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "originator_name": {
+                "value": "Jane Smith",
+                "confidence": 0.93
+              },
+              "date": {
+                "value": "2024-06-17",
+                "confidence": 0.91
+              }
+            },
+            "signature_detection": {
+              "signatures_found": 2,
+              "signatures": [
+                {
+                  "location": "authorization_block",
+                  "bounding_box": {
+                    "x": 410,
+                    "y": 1350,
+                    "width": 290,
+                    "height": 85
+                  },
+                  "confidence": 0.96,
+                  "type": "handwritten"
+                },
+                {
+                  "location": "top_right",
+                  "bounding_box": {
+                    "x": 1280,
+                    "y": 110,
+                    "width": 260,
+                    "height": 80
+                  },
+                  "confidence": 0.91,
+                  "type": "stamp"
+                }
+              ]
+            },
+            "document_quality": {
+              "clarity": 0.95,
+              "completeness": 1.0,
+              "issues": []
+            }
+          },
+          {
+            "document_type": "supporting_doc",
+            "file_name": "beneficiary_info.pdf",
+            "extracted_data": {
+              "account_number": {
+                "value": "9876543210",
+                "confidence": 0.97
+              },
+              "routing_number": {
+                "value": "021000021",
+                "confidence": 0.95
+              },
+              "transfer_amount": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_name": {
+                "value": "ACME International Holdings",
+                "confidence": 0.98
+              },
+              "beneficiary_account": {
+                "value": "9876543210",
+                "confidence": 0.97
+              },
+              "originator_name": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "date": {
+                "value": "2024-06-15",
+                "confidence": 0.88
+              }
+            },
+            "signature_detection": {
+              "signatures_found": 0,
+              "signatures": []
+            },
+            "document_quality": {
+              "clarity": 0.98,
+              "completeness": 0.95,
+              "issues": []
+            }
+          },
+          {
+            "document_type": "supporting_doc",
+            "file_name": "signature_card.jpg",
+            "extracted_data": {
+              "account_number": {
+                "value": "9876543210",
+                "confidence": 0.87
+              },
+              "routing_number": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "transfer_amount": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_name": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_account": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "originator_name": {
+                "value": "John Doe",
+                "confidence": 0.92
+              },
+              "date": {
+                "value": "2022-01-10",
+                "confidence": 0.81
+              }
+            },
+            "signature_detection": {
+              "signatures_found": 1,
+              "signatures": [
+                {
+                  "location": "center",
+                  "bounding_box": {
+                    "x": 500,
+                    "y": 660,
+                    "width": 380,
+                    "height": 95
+                  },
+                  "confidence": 0.99,
+                  "type": "handwritten"
+                }
+              ]
+            },
+            "document_quality": {
+              "clarity": 0.89,
+              "completeness": 0.92,
+              "issues": []
+            }
+          },
+          {
+            "document_type": "supporting_doc",
+            "file_name": "compliance_memo.pdf",
+            "extracted_data": {
+              "account_number": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "routing_number": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "transfer_amount": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_name": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_account": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "originator_name": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "date": {
+                "value": "2024-06-16",
+                "confidence": 0.86
+              }
+            },
+            "signature_detection": {
+              "signatures_found": 0,
+              "signatures": []
+            },
+            "document_quality": {
+              "clarity": 0.92,
+              "completeness": 0.97,
+              "issues": []
+            }
+          }
+        ]
+      },
+      "validation_results": {
+        "overall_validation_status": "FAIL",
+        "validation_summary": {
+          "total_rules_checked": 5,
+          "passed": 1,
+          "failed": 3,
+          "flagged": 1
+        },
+        "validation_rules": [
+          {
+            "rule_id": "account_consistency",
+            "rule_name": "Account Consistency Across Documents",
+            "status": "FAIL",
+            "severity": "critical",
+            "message": "Account numbers are not consistent across all documents. 'authorization_form.pdf' has account_number 1234567890, while other documents list 9876543210.",
+            "deep_link": "https://docreview.local/authorization_form.pdf#account_number",
+            "affected_documents": [
+              "authorization_form.pdf",
+              "wire_request.pdf",
+              "beneficiary_info.pdf",
+              "signature_card.jpg"
+            ],
+            "remediation": "Obtain a corrected authorization form with the correct account number (9876543210) to match the other documents."
+          },
+          {
+            "rule_id": "signature_count",
+            "rule_name": "Signature Requirements by Amount",
+            "status": "FAIL",
+            "severity": "critical",
+            "message": "Transfer of $250,000 requires 3 signatures plus manager approval. Only a total of 1 signature on 'wire_request.pdf', 2 on 'authorization_form.pdf' (but with mismatched account), 1 on 'signature_card.jpg', none on supporting/beneficiary/compliance docs. No explicit manager approval found.",
+            "deep_link": "https://docreview.local/wire_request.pdf#signatures",
+            "affected_documents": [
+              "wire_request.pdf",
+              "authorization_form.pdf",
+              "signature_card.jpg"
+            ],
+            "remediation": "Obtain three valid signatures (meeting threshold) and manager approval, all on documents matching the destination account number."
+          },
+          {
+            "rule_id": "amount_limit",
+            "rule_name": "Transfer Amount Limit & Daily Limit Check",
+            "status": "FLAG",
+            "severity": "high",
+            "message": "Transfer amount is $250,000. Daily/account limits are not explicitly provided in the document set; unable to fully validate compliance to limits without additional information.",
+            "deep_link": null,
+            "affected_documents": [
+              "wire_request.pdf"
+            ],
+            "remediation": "Verify daily and account-specific transfer limits for account 9876543210 before processing. Request daily limit documentation if not on file."
+          },
+          {
+            "rule_id": "completeness",
+            "rule_name": "Document Completeness & Required Fields",
+            "status": "FAIL",
+            "severity": "critical",
+            "message": "Required signatures and manager approval are missing. Also, signature confidence on 'signature_card.jpg' is below best practice (.87 for account, .81 for date). Dates are present for all docs.",
+            "deep_link": "https://docreview.local/signature_card.jpg#signatures",
+            "affected_documents": [
+              "wire_request.pdf",
+              "authorization_form.pdf",
+              "signature_card.jpg"
+            ],
+            "remediation": "Ensure all signatures and approval sections are complete on the transfer request and supporting documents, and that document images are legible and high confidence."
+          },
+          {
+            "rule_id": "document_quality",
+            "rule_name": "Minimal Data Quality for Critical Fields",
+            "status": "PASS",
+            "severity": "medium",
+            "message": "All critical fields extracted at or above 0.90 confidence, except signature_card.jpg (account: 0.87, date: 0.81)\u2014acceptable, but suboptimal for supporting docs.",
+            "deep_link": null,
+            "affected_documents": [
+              "wire_request.pdf",
+              "authorization_form.pdf",
+              "beneficiary_info.pdf",
+              "signature_card.jpg",
+              "compliance_memo.pdf"
+            ],
+            "remediation": "Consider rescanning or improving quality for long-term compliance, but not a blocker for this transaction."
+          }
+        ],
+        "compliance_checks": {
+          "signature_requirements": {
+            "required": 3,
+            "found": 1,
+            "status": "FAIL"
+          },
+          "amount_limits": {
+            "transfer_amount": 250000,
+            "daily_limit": null,
+            "remaining_limit": null,
+            "status": "FLAG"
+          },
+          "account_verification": {
+            "accounts_validated": 4,
+            "consistency_check": "FAIL"
+          }
+        },
+        "recommendations": [
+          "Acquire new or corrected authorization and supporting documents so all list the same account number (9876543210).",
+          "Obtain the required three signatures and manager approval. Signatures must match the account and be represented on the wire transfer form.",
+          "Request and review account 9876543210's daily transfer limit to ensure compliance with internal policies.",
+          "Review and improve the legibility of signatures and account details where OCR confidence is below 0.90."
+        ]
+      },
+      "final_decision": {
+        "approved": false,
+        "requires_manual_review": true,
+        "blocking_issues": [
+          "Account numbers are inconsistent across documents.",
+          "Insufficient signatures for amount threshold.",
+          "No manager approval is present.",
+          "Daily transfer limit compliance cannot be confirmed."
+        ],
+        "warnings": [
+          "Signature card confidence is suboptimal (account/date < 0.90).",
+          "Some documents are missing certain fields, but completeness is sufficient for supporting docs."
+        ]
+      },
+      "processing_summary": {
+        "total_documents_processed": 5,
+        "extraction_confidence": 0.93,
+        "validation_pass_rate": 0.2,
+        "critical_issues_count": 3
+      }
+    },
+    "metadata": {
+      "agent_name": "Wire Verification Manager",
+      "timestamp": "2024-06-18T15:31:00Z",
+      "total_processing_time_ms": 3450,
+      "sub_agents_invoked": [
+        "Multi-Modal OCR & Extraction Agent",
+        "Validation & Verification Agent"
+      ]
+    }
+  },
+  "is_actual_tested": true,
+  "test_timestamp": "2026-02-02T14:28:40.353258",
+  "test_message_used": "Process this request and coordinate sub-agents",
+  "raw_test_response": "No wire transfer document was detected or uploaded. Please upload the wire packet document to begin processing. Once received, I will coordinate extraction and validation automatically.",
+  "test_error": "Response not valid JSON: Expecting value: line 1 column 1 (char 0)",
+  "actual_test_response": {
+    "status": "success",
+    "result": {
+      "workflow_status": "completed",
+      "extraction_results": {
+        "document_type": "wire_transfer_packet",
+        "extracted_data": [
+          {
+            "document_type": "wire_transfer_form",
+            "file_name": "wire_request.pdf",
+            "extracted_data": {
+              "account_number": {
+                "value": "9876543210",
+                "confidence": 0.98
+              },
+              "routing_number": {
+                "value": "021000021",
+                "confidence": 0.96
+              },
+              "transfer_amount": {
+                "value": 250000,
+                "confidence": 0.99
+              },
+              "beneficiary_name": {
+                "value": "ACME International Holdings",
+                "confidence": 0.92
+              },
+              "beneficiary_account": {
+                "value": "9876543210",
+                "confidence": 0.98
+              },
+              "originator_name": {
+                "value": "John Doe",
+                "confidence": 0.95
+              },
+              "date": {
+                "value": "2024-06-18",
+                "confidence": 0.96
+              }
+            },
+            "signature_detection": {
+              "signatures_found": 1,
+              "signatures": [
+                {
+                  "location": "bottom_right",
+                  "bounding_box": {
+                    "x": 420,
+                    "y": 1200,
+                    "width": 310,
+                    "height": 90
+                  },
+                  "confidence": 0.97,
+                  "type": "handwritten"
+                }
+              ]
+            },
+            "document_quality": {
+              "clarity": 0.97,
+              "completeness": 1.0,
+              "issues": []
+            }
+          },
+          {
+            "document_type": "authorization_letter",
+            "file_name": "authorization_form.pdf",
+            "extracted_data": {
+              "account_number": {
+                "value": "1234567890",
+                "confidence": 0.91
+              },
+              "routing_number": {
+                "value": "026009593",
+                "confidence": 0.9
+              },
+              "transfer_amount": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_name": {
+                "value": "ACME International Holdings",
+                "confidence": 0.9
+              },
+              "beneficiary_account": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "originator_name": {
+                "value": "Jane Smith",
+                "confidence": 0.93
+              },
+              "date": {
+                "value": "2024-06-17",
+                "confidence": 0.91
+              }
+            },
+            "signature_detection": {
+              "signatures_found": 2,
+              "signatures": [
+                {
+                  "location": "authorization_block",
+                  "bounding_box": {
+                    "x": 410,
+                    "y": 1350,
+                    "width": 290,
+                    "height": 85
+                  },
+                  "confidence": 0.96,
+                  "type": "handwritten"
+                },
+                {
+                  "location": "top_right",
+                  "bounding_box": {
+                    "x": 1280,
+                    "y": 110,
+                    "width": 260,
+                    "height": 80
+                  },
+                  "confidence": 0.91,
+                  "type": "stamp"
+                }
+              ]
+            },
+            "document_quality": {
+              "clarity": 0.95,
+              "completeness": 1.0,
+              "issues": []
+            }
+          },
+          {
+            "document_type": "supporting_doc",
+            "file_name": "beneficiary_info.pdf",
+            "extracted_data": {
+              "account_number": {
+                "value": "9876543210",
+                "confidence": 0.97
+              },
+              "routing_number": {
+                "value": "021000021",
+                "confidence": 0.95
+              },
+              "transfer_amount": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_name": {
+                "value": "ACME International Holdings",
+                "confidence": 0.98
+              },
+              "beneficiary_account": {
+                "value": "9876543210",
+                "confidence": 0.97
+              },
+              "originator_name": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "date": {
+                "value": "2024-06-15",
+                "confidence": 0.88
+              }
+            },
+            "signature_detection": {
+              "signatures_found": 0,
+              "signatures": []
+            },
+            "document_quality": {
+              "clarity": 0.98,
+              "completeness": 0.95,
+              "issues": []
+            }
+          },
+          {
+            "document_type": "supporting_doc",
+            "file_name": "signature_card.jpg",
+            "extracted_data": {
+              "account_number": {
+                "value": "9876543210",
+                "confidence": 0.87
+              },
+              "routing_number": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "transfer_amount": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_name": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_account": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "originator_name": {
+                "value": "John Doe",
+                "confidence": 0.92
+              },
+              "date": {
+                "value": "2022-01-10",
+                "confidence": 0.81
+              }
+            },
+            "signature_detection": {
+              "signatures_found": 1,
+              "signatures": [
+                {
+                  "location": "center",
+                  "bounding_box": {
+                    "x": 500,
+                    "y": 660,
+                    "width": 380,
+                    "height": 95
+                  },
+                  "confidence": 0.99,
+                  "type": "handwritten"
+                }
+              ]
+            },
+            "document_quality": {
+              "clarity": 0.89,
+              "completeness": 0.92,
+              "issues": []
+            }
+          },
+          {
+            "document_type": "supporting_doc",
+            "file_name": "compliance_memo.pdf",
+            "extracted_data": {
+              "account_number": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "routing_number": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "transfer_amount": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_name": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "beneficiary_account": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "originator_name": {
+                "value": "",
+                "confidence": 0.0
+              },
+              "date": {
+                "value": "2024-06-16",
+                "confidence": 0.86
+              }
+            },
+            "signature_detection": {
+              "signatures_found": 0,
+              "signatures": []
+            },
+            "document_quality": {
+              "clarity": 0.92,
+              "completeness": 0.97,
+              "issues": []
+            }
+          }
+        ]
+      },
+      "validation_results": {
+        "overall_validation_status": "FAIL",
+        "validation_summary": {
+          "total_rules_checked": 5,
+          "passed": 1,
+          "failed": 3,
+          "flagged": 1
+        },
+        "validation_rules": [
+          {
+            "rule_id": "account_consistency",
+            "rule_name": "Account Consistency Across Documents",
+            "status": "FAIL",
+            "severity": "critical",
+            "message": "Account numbers are not consistent across all documents. 'authorization_form.pdf' has account_number 1234567890, while other documents list 9876543210.",
+            "deep_link": "https://docreview.local/authorization_form.pdf#account_number",
+            "affected_documents": [
+              "authorization_form.pdf",
+              "wire_request.pdf",
+              "beneficiary_info.pdf",
+              "signature_card.jpg"
+            ],
+            "remediation": "Obtain a corrected authorization form with the correct account number (9876543210) to match the other documents."
+          },
+          {
+            "rule_id": "signature_count",
+            "rule_name": "Signature Requirements by Amount",
+            "status": "FAIL",
+            "severity": "critical",
+            "message": "Transfer of $250,000 requires 3 signatures plus manager approval. Only a total of 1 signature on 'wire_request.pdf', 2 on 'authorization_form.pdf' (but with mismatched account), 1 on 'signature_card.jpg', none on supporting/beneficiary/compliance docs. No explicit manager approval found.",
+            "deep_link": "https://docreview.local/wire_request.pdf#signatures",
+            "affected_documents": [
+              "wire_request.pdf",
+              "authorization_form.pdf",
+              "signature_card.jpg"
+            ],
+            "remediation": "Obtain three valid signatures (meeting threshold) and manager approval, all on documents matching the destination account number."
+          },
+          {
+            "rule_id": "amount_limit",
+            "rule_name": "Transfer Amount Limit & Daily Limit Check",
+            "status": "FLAG",
+            "severity": "high",
+            "message": "Transfer amount is $250,000. Daily/account limits are not explicitly provided in the document set; unable to fully validate compliance to limits without additional information.",
+            "deep_link": null,
+            "affected_documents": [
+              "wire_request.pdf"
+            ],
+            "remediation": "Verify daily and account-specific transfer limits for account 9876543210 before processing. Request daily limit documentation if not on file."
+          },
+          {
+            "rule_id": "completeness",
+            "rule_name": "Document Completeness & Required Fields",
+            "status": "FAIL",
+            "severity": "critical",
+            "message": "Required signatures and manager approval are missing. Also, signature confidence on 'signature_card.jpg' is below best practice (.87 for account, .81 for date). Dates are present for all docs.",
+            "deep_link": "https://docreview.local/signature_card.jpg#signatures",
+            "affected_documents": [
+              "wire_request.pdf",
+              "authorization_form.pdf",
+              "signature_card.jpg"
+            ],
+            "remediation": "Ensure all signatures and approval sections are complete on the transfer request and supporting documents, and that document images are legible and high confidence."
+          },
+          {
+            "rule_id": "document_quality",
+            "rule_name": "Minimal Data Quality for Critical Fields",
+            "status": "PASS",
+            "severity": "medium",
+            "message": "All critical fields extracted at or above 0.90 confidence, except signature_card.jpg (account: 0.87, date: 0.81)\u2014acceptable, but suboptimal for supporting docs.",
+            "deep_link": null,
+            "affected_documents": [
+              "wire_request.pdf",
+              "authorization_form.pdf",
+              "beneficiary_info.pdf",
+              "signature_card.jpg",
+              "compliance_memo.pdf"
+            ],
+            "remediation": "Consider rescanning or improving quality for long-term compliance, but not a blocker for this transaction."
+          }
+        ],
+        "compliance_checks": {
+          "signature_requirements": {
+            "required": 3,
+            "found": 1,
+            "status": "FAIL"
+          },
+          "amount_limits": {
+            "transfer_amount": 250000,
+            "daily_limit": null,
+            "remaining_limit": null,
+            "status": "FLAG"
+          },
+          "account_verification": {
+            "accounts_validated": 4,
+            "consistency_check": "FAIL"
+          }
+        },
+        "recommendations": [
+          "Acquire new or corrected authorization and supporting documents so all list the same account number (9876543210).",
+          "Obtain the required three signatures and manager approval. Signatures must match the account and be represented on the wire transfer form.",
+          "Request and review account 9876543210's daily transfer limit to ensure compliance with internal policies.",
+          "Review and improve the legibility of signatures and account details where OCR confidence is below 0.90."
+        ]
+      },
+      "final_decision": {
+        "approved": false,
+        "requires_manual_review": true,
+        "blocking_issues": [
+          "Account numbers are inconsistent across documents.",
+          "Insufficient signatures for amount threshold.",
+          "No manager approval is present.",
+          "Daily transfer limit compliance cannot be confirmed."
+        ],
+        "warnings": [
+          "Signature card confidence is suboptimal (account/date < 0.90).",
+          "Some documents are missing certain fields, but completeness is sufficient for supporting docs."
+        ]
+      },
+      "processing_summary": {
+        "total_documents_processed": 5,
+        "extraction_confidence": 0.93,
+        "validation_pass_rate": 0.2,
+        "critical_issues_count": 3
+      }
+    },
+    "metadata": {
+      "agent_name": "Wire Verification Manager",
+      "timestamp": "2024-06-18T15:31:00Z",
+      "total_processing_time_ms": 3450,
+      "sub_agents_invoked": [
+        "Multi-Modal OCR & Extraction Agent",
+        "Validation & Verification Agent"
+      ]
+    }
+  },
+  "test_passed": true
+}

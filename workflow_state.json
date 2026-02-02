@@ -1,0 +1,58 @@
+{
+  "workflow_name": "WireGuard Verification Command Center",
+  "workflow_type": "manager-subagent",
+  "creation_date": "2026-02-02",
+  "agents": {
+    "manager": {
+      "agent_id": "6980b3bf066158e77fdea70b",
+      "name": "Wire Verification Manager",
+      "type": "Manager",
+      "status": "created",
+      "model": "gpt-4.1",
+      "provider": "OpenAI",
+      "temperature": 0.2,
+      "managed_agents": [
+        "6980b377066158e77fdea689",
+        "6980b39ad36f070193f61fc5"
+      ]
+    },
+    "sub_agents": [
+      {
+        "agent_id": "6980b377066158e77fdea689",
+        "name": "Multi-Modal OCR & Extraction Agent",
+        "type": "Sub-Agent",
+        "status": "created",
+        "model": "gpt-4.1",
+        "provider": "OpenAI",
+        "temperature": 0.1,
+        "purpose": "OCR extraction and document processing"
+      },
+      {
+        "agent_id": "6980b39ad36f070193f61fc5",
+        "name": "Validation & Verification Agent",
+        "type": "Sub-Agent",
+        "status": "created",
+        "model": "gpt-4.1",
+        "provider": "OpenAI",
+        "temperature": 0.1,
+        "purpose": "Validation and compliance checking"
+      }
+    ]
+  },
+  "workflow_execution": {
+    "trigger": "Process Wire Packet button click on Upload Screen",
+    "sequence": [
+      "Wire Verification Manager receives upload",
+      "Multi-Modal OCR & Extraction Agent processes documents",
+      "Validation & Verification Agent validates extracted data",
+      "Wire Verification Manager aggregates results"
+    ]
+  },
+  "response_schemas": {
+    "manager": "response_schemas/wire_verification_manager_response.json",
+    "sub_agents": {
+      "ocr_extraction": "response_schemas/multi_modal_ocr_extraction_agent_response.json",
+      "validation": "response_schemas/validation_verification_agent_response.json"
+    }
+  }
+}

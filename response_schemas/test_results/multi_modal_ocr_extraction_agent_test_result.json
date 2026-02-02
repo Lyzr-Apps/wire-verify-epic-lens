@@ -1,0 +1,72 @@
+{
+  "agent_name": "Multi-Modal OCR & Extraction Agent",
+  "agent_id": "6980b377066158e77fdea689",
+  "test_message": "Extract data from wire_request.pdf containing: Originating Account: 1234567890, Beneficiary Account: 9876543210, Amount: $250,000.00, Beneficiary Name: Acme Corporation, Bank: First National Bank, ABA: 021000021. Signature detected at coordinates (450, 720) with 0.95 confidence.",
+  "expected_purpose": "ocr_extraction",
+  "timestamp": "2026-02-02T14:28:58.241392",
+  "is_valid_json": true,
+  "validation_errors": [],
+  "actual_response": {
+    "status": "success",
+    "result": {
+      "document_type": "wire_transfer_form",
+      "extracted_data": {
+        "account_number": {
+          "value": "1234567890",
+          "confidence": 0.98
+        },
+        "routing_number": {
+          "value": "021000021",
+          "confidence": 0.97
+        },
+        "transfer_amount": {
+          "value": 250000.0,
+          "confidence": 0.99
+        },
+        "beneficiary_name": {
+          "value": "Acme Corporation",
+          "confidence": 0.97
+        },
+        "beneficiary_account": {
+          "value": "9876543210",
+          "confidence": 0.98
+        },
+        "originator_name": {
+          "value": "",
+          "confidence": 0.0
+        },
+        "date": {
+          "value": "",
+          "confidence": 0.0
+        }
+      },
+      "signature_detection": {
+        "signatures_found": 1,
+        "signatures": [
+          {
+            "location": "authorization_block",
+            "bounding_box": {
+              "x": 450,
+              "y": 720,
+              "width": 120,
+              "height": 40
+            },
+            "confidence": 0.95,
+            "type": "handwritten"
+          }
+        ]
+      },
+      "document_quality": {
+        "clarity": 0.98,
+        "completeness": 0.96,
+        "issues": []
+      }
+    },
+    "metadata": {
+      "agent_name": "Multi-Modal OCR & Extraction Agent",
+      "timestamp": "2024-06-11T15:22:45Z",
+      "processing_time_ms": 430
+    }
+  },
+  "raw_response": "{\n  \"status\": \"success\",\n  \"result\": {\n    \"document_type\": \"wire_transfer_form\",\n    \"extracted_data\": {\n      \"account_number\": {\n        \"value\": \"1234567890\",\n        \"confidence\": 0.98\n      },\n      \"routing_number\": {\n        \"value\": \"021000021\",\n        \"confidence\": 0.97\n      },\n      \"transfer_amount\": {\n        \"value\": 250000.00,\n        \"confidence\": 0.99\n      },\n      \"beneficiary_name\": {\n        \"value\": \"Acme Corporation\",\n        \"confidence\": 0.97\n      },\n      \"beneficiary_account\": {\n        \"value\": \"9876543210\",\n        \"confidence\": 0.98\n      },\n      \"originator_name\": {\n        \"value\": \"\",\n        \"confidence\": 0.0\n      },\n      \"date\": {\n        \"value\": \"\",\n        \"confidence\": 0.0\n      }\n    },\n    \"signature_detection\": {\n      \"signatures_found\": 1,\n      \"signatures\": [\n        {\n          \"location\": \"authorization_block\",\n          \"bounding_box\": {\n            \"x\": 450,\n            \"y\": 720,\n            \"width\": 120,\n            \"height\": 40\n          },\n          \"confidence\": 0.95,\n          \"type\": \"handwritten\"\n        }\n      ]\n    },\n    \"document_quality\": {\n      \"clarity\": 0.98,\n      \"completeness\": 0.96,\n      \"issues\": []\n    }\n  },\n  \"metadata\": {\n    \"agent_name\": \"Multi-Modal OCR & Extraction Agent\",\n    \"timestamp\": \"2024-06-11T15:22:45Z\",\n    \"processing_time_ms\": 430\n  }\n}"
+}

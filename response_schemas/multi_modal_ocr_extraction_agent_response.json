@@ -1,0 +1,198 @@
+{
+  "agent_name": "Multi-Modal OCR & Extraction Agent",
+  "agent_id": "6980b377066158e77fdea689",
+  "agent_purpose": "parser",
+  "description": "Extracts structured wire transfer data from documents with vision OCR, including account numbers, amounts, beneficiaries, and signature detection with coordinate-level confidence scoring",
+  "response_schema": {
+    "status": "string",
+    "result": {
+      "document_type": "string",
+      "extracted_data": {
+        "account_number": {
+          "value": "string",
+          "confidence": "number"
+        },
+        "routing_number": {
+          "value": "string",
+          "confidence": "number"
+        },
+        "transfer_amount": {
+          "value": "number",
+          "confidence": "number"
+        },
+        "beneficiary_name": {
+          "value": "string",
+          "confidence": "number"
+        },
+        "beneficiary_account": {
+          "value": "string",
+          "confidence": "number"
+        },
+        "originator_name": {
+          "value": "string",
+          "confidence": "number"
+        },
+        "date": {
+          "value": "string",
+          "confidence": "number"
+        }
+      },
+      "signature_detection": {
+        "signatures_found": "number",
+        "signatures": [
+          {
+            "location": "string",
+            "bounding_box": {
+              "x": "number",
+              "y": "number",
+              "width": "number",
+              "height": "number"
+            },
+            "confidence": "number",
+            "type": "string"
+          }
+        ]
+      },
+      "document_quality": {
+        "clarity": "number",
+        "completeness": "number",
+        "issues": [
+          "any"
+        ]
+      }
+    },
+    "metadata": {
+      "agent_name": "string",
+      "timestamp": "string",
+      "processing_time_ms": "number"
+    }
+  },
+  "example_response": {
+    "status": "success",
+    "result": {
+      "document_type": "wire_transfer_form",
+      "extracted_data": {
+        "account_number": {
+          "value": "1234567890",
+          "confidence": 0.98
+        },
+        "routing_number": {
+          "value": "021000021",
+          "confidence": 0.97
+        },
+        "transfer_amount": {
+          "value": 250000.0,
+          "confidence": 0.99
+        },
+        "beneficiary_name": {
+          "value": "Acme Corporation",
+          "confidence": 0.97
+        },
+        "beneficiary_account": {
+          "value": "9876543210",
+          "confidence": 0.98
+        },
+        "originator_name": {
+          "value": "",
+          "confidence": 0.0
+        },
+        "date": {
+          "value": "",
+          "confidence": 0.0
+        }
+      },
+      "signature_detection": {
+        "signatures_found": 1,
+        "signatures": [
+          {
+            "location": "authorization_block",
+            "bounding_box": {
+              "x": 450,
+              "y": 720,
+              "width": 120,
+              "height": 40
+            },
+            "confidence": 0.95,
+            "type": "handwritten"
+          }
+        ]
+      },
+      "document_quality": {
+        "clarity": 0.98,
+        "completeness": 0.96,
+        "issues": []
+      }
+    },
+    "metadata": {
+      "agent_name": "Multi-Modal OCR & Extraction Agent",
+      "timestamp": "2024-06-11T15:22:45Z",
+      "processing_time_ms": 430
+    }
+  },
+  "is_actual_tested": true,
+  "test_timestamp": "2026-02-02T14:28:58.242261",
+  "test_message_used": "Parse this sample text for testing",
+  "actual_test_response": {
+    "status": "success",
+    "result": {
+      "document_type": "wire_transfer_form",
+      "extracted_data": {
+        "account_number": {
+          "value": "1234567890",
+          "confidence": 0.98
+        },
+        "routing_number": {
+          "value": "021000021",
+          "confidence": 0.97
+        },
+        "transfer_amount": {
+          "value": 250000.0,
+          "confidence": 0.99
+        },
+        "beneficiary_name": {
+          "value": "Acme Corporation",
+          "confidence": 0.97
+        },
+        "beneficiary_account": {
+          "value": "9876543210",
+          "confidence": 0.98
+        },
+        "originator_name": {
+          "value": "",
+          "confidence": 0.0
+        },
+        "date": {
+          "value": "",
+          "confidence": 0.0
+        }
+      },
+      "signature_detection": {
+        "signatures_found": 1,
+        "signatures": [
+          {
+            "location": "authorization_block",
+            "bounding_box": {
+              "x": 450,
+              "y": 720,
+              "width": 120,
+              "height": 40
+            },
+            "confidence": 0.95,
+            "type": "handwritten"
+          }
+        ]
+      },
+      "document_quality": {
+        "clarity": 0.98,
+        "completeness": 0.96,
+        "issues": []
+      }
+    },
+    "metadata": {
+      "agent_name": "Multi-Modal OCR & Extraction Agent",
+      "timestamp": "2024-06-11T15:22:45Z",
+      "processing_time_ms": 430
+    }
+  },
+  "test_passed": true
+}
