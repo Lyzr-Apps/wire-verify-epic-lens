@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Upload, X, FileText, Image as ImageIcon, File, CheckCircle2, XCircle, AlertTriangle, ChevronDown, ChevronUp, Loader2, ArrowLeft, ExternalLink } from 'lucide-react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Upload, X, FileText, Image as ImageIcon, File, CheckCircle2, XCircle, AlertTriangle, ChevronDown, ChevronUp, Loader2, ArrowLeft, ExternalLink, Plus, PackageSearch, FolderOpen } from 'lucide-react'
 import { callAIAgent } from '@/utils/aiAgent'
 import { cn } from '@/lib/utils'
 
@@ -151,7 +152,14 @@ interface UploadedFile {
   id: string
 }
 
-type Screen = 'upload' | 'processing' | 'dashboard'
+interface StoredVerification {
+  id: string
+  result: WireVerificationResponse
+  timestamp: string
+  clerkNotes: string
+}
+
+type View = 'list' | 'detail'
 
 // Component: File Icon
 function FileIcon({ fileName }: { fileName: string }) {
@@ -161,12 +169,12 @@ function FileIcon({ fileName }: { fileName: string }) {
   return <File className="h-5 w-5 text-gray-500" />
 }
 
-// Component: Status Badge
+// Component: Status Badge (Light Theme)
 function StatusBadge({ status }: { status: 'PASS' | 'FAIL' | 'FLAG' }) {
   const styles = {
-    PASS: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-    FAIL: 'bg-red-500/10 text-red-500 border-red-500/20',
-    FLAG: 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+    PASS: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    FAIL: 'bg-red-50 text-red-700 border-red-200',
+    FLAG: 'bg-amber-50 text-amber-700 border-amber-200'
   }
 
   const icons = {
@@ -183,29 +191,29 @@ function StatusBadge({ status }: { status: 'PASS' | 'FAIL' | 'FLAG' }) {
   )
 }
 
-// Component: Validation Rule Card
+// Component: Validation Rule Card (Light Theme)
 function ValidationRuleCard({ rule }: { rule: ValidationRule }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-white border-gray-200">
         <CollapsibleTrigger className="w-full">
-          <CardHeader className="cursor-pointer hover:bg-slate-700/50 transition-colors">
+          <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 text-left">
                 <div className="flex items-center gap-2 mb-1">
                   <StatusBadge status={rule.status} />
-                  <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                  <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
                     {rule.severity}
                   </Badge>
                 </div>
-                <CardTitle className="text-white text-base">{rule.rule_name}</CardTitle>
+                <CardTitle className="text-gray-900 text-base">{rule.rule_name}</CardTitle>
               </div>
               {isOpen ? (
-                <ChevronUp className="h-5 w-5 text-slate-400 flex-shrink-0" />
+                <ChevronUp className="h-5 w-5 text-gray-400 flex-shrink-0" />
               ) : (
-                <ChevronDown className="h-5 w-5 text-slate-400 flex-shrink-0" />
+                <ChevronDown className="h-5 w-5 text-gray-400 flex-shrink-0" />
               )}
             </div>
           </CardHeader>
@@ -213,13 +221,13 @@ function ValidationRuleCard({ rule }: { rule: ValidationRule }) {
         <CollapsibleContent>
           <CardContent className="space-y-4 pt-0">
             <div>
-              <p className="text-sm text-slate-300 mb-3">{rule.message}</p>
+              <p className="text-sm text-gray-700 mb-3">{rule.message}</p>
               {rule.deep_link && (
                 <a
                   href={rule.deep_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 hover:underline"
+                  className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 hover:underline"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                   View Issue in Document
@@ -227,22 +235,22 @@ function ValidationRuleCard({ rule }: { rule: ValidationRule }) {
               )}
             </div>
 
-            <Separator className="bg-slate-700" />
+            <Separator className="bg-gray-200" />
 
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Affected Documents</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Affected Documents</p>
               <div className="flex flex-wrap gap-2">
                 {rule.affected_documents.map((doc, i) => (
-                  <Badge key={i} variant="outline" className="text-xs border-slate-600 text-slate-300">
+                  <Badge key={i} variant="outline" className="text-xs border-gray-300 text-gray-700">
                     {doc}
                   </Badge>
                 ))}
               </div>
             </div>
 
-            <div className="bg-slate-900/50 border border-slate-700 rounded-md p-3">
-              <p className="text-xs font-semibold text-slate-400 uppercase mb-1.5">Remediation</p>
-              <p className="text-sm text-slate-300">{rule.remediation}</p>
+            <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
+              <p className="text-xs font-semibold text-gray-500 uppercase mb-1.5">Remediation</p>
+              <p className="text-sm text-gray-700">{rule.remediation}</p>
             </div>
           </CardContent>
         </CollapsibleContent>
@@ -251,13 +259,17 @@ function ValidationRuleCard({ rule }: { rule: ValidationRule }) {
   )
 }
 
-// Component: Upload Screen
-function UploadScreen({
+// Component: Upload Modal
+function UploadModal({
+  isOpen,
+  onClose,
   files,
   onFilesChange,
   onProcess,
   isProcessing
 }: {
+  isOpen: boolean
+  onClose: () => void
   files: UploadedFile[]
   onFilesChange: (files: UploadedFile[]) => void
   onProcess: () => void
@@ -304,32 +316,33 @@ function UploadScreen({
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
-      <Card className="w-full max-w-2xl bg-slate-800 border-slate-700">
-        <CardHeader>
-          <CardTitle className="text-white text-2xl">Wire Verification Command Center</CardTitle>
-          <CardDescription className="text-slate-400">
-            Upload wire transfer documents for automated verification and compliance checking
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl bg-white">
+        <DialogHeader>
+          <DialogTitle className="text-gray-900 text-xl">Upload Wire Packet</DialogTitle>
+          <DialogDescription className="text-gray-600">
+            Upload wire transfer documents for automated verification
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
           <div
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             className={cn(
-              'border-2 border-dashed rounded-lg p-12 text-center transition-colors',
+              'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
               isDragging
-                ? 'border-blue-500 bg-blue-500/5'
-                : 'border-slate-600 hover:border-slate-500 bg-slate-900/50'
+                ? 'border-black bg-gray-50'
+                : 'border-gray-300 hover:border-gray-400 bg-gray-50/50'
             )}
           >
-            <Upload className="h-12 w-12 text-slate-500 mx-auto mb-4" />
-            <p className="text-white font-medium mb-2">
-              Drag and drop files here, or click to browse
+            <Upload className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+            <p className="text-gray-900 font-medium mb-1">
+              Drag and drop files here
             </p>
-            <p className="text-sm text-slate-400 mb-4">
-              Accepts PDF, PNG, JPG, TIFF files
+            <p className="text-sm text-gray-500 mb-3">
+              Supports PDF, PNG, JPG, TIFF
             </p>
             <input
               type="file"
@@ -337,10 +350,10 @@ function UploadScreen({
               accept=".pdf,.png,.jpg,.jpeg,.tiff"
               onChange={handleFileInput}
               className="hidden"
-              id="file-upload"
+              id="file-upload-modal"
             />
-            <label htmlFor="file-upload">
-              <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700" asChild>
+            <label htmlFor="file-upload-modal">
+              <Button variant="outline" className="border-gray-300" asChild>
                 <span>Browse Files</span>
               </Button>
             </label>
@@ -348,20 +361,20 @@ function UploadScreen({
 
           {files.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-slate-400 uppercase">File Queue ({files.length})</p>
-              <ScrollArea className="h-64 border border-slate-700 rounded-md bg-slate-900/50">
-                <div className="p-4 space-y-2">
+              <p className="text-sm font-semibold text-gray-700">Files ({files.length})</p>
+              <ScrollArea className="h-48 border border-gray-200 rounded-md bg-white">
+                <div className="p-3 space-y-2">
                   {files.map((uploadedFile) => (
                     <div
                       key={uploadedFile.id}
-                      className="flex items-center gap-3 p-3 bg-slate-800 border border-slate-700 rounded-md"
+                      className="flex items-center gap-3 p-2 bg-gray-50 border border-gray-200 rounded-md"
                     >
                       <FileIcon fileName={uploadedFile.file.name} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">
+                        <p className="text-sm font-medium text-gray-900 truncate">
                           {uploadedFile.file.name}
                         </p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-gray-500">
                           {formatFileSize(uploadedFile.file.size)}
                         </p>
                       </div>
@@ -369,7 +382,7 @@ function UploadScreen({
                         size="sm"
                         variant="ghost"
                         onClick={() => removeFile(uploadedFile.id)}
-                        className="text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                        className="text-gray-400 hover:text-red-600"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -379,30 +392,41 @@ function UploadScreen({
               </ScrollArea>
             </div>
           )}
-        </CardContent>
-        <CardFooter>
-          <Button
-            onClick={onProcess}
-            disabled={files.length === 0 || isProcessing}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            size="lg"
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              'Process Wire Packet'
-            )}
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={isProcessing}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                onProcess()
+                onClose()
+              }}
+              disabled={files.length === 0 || isProcessing}
+              className="flex-1 bg-black hover:bg-gray-800 text-white"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                'Process Packet'
+              )}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
-// Component: Processing Screen
+// Component: Processing Screen (Modal Overlay)
 function ProcessingScreen({ currentStep, totalDocs }: { currentStep: number; totalDocs: number }) {
   const steps = [
     { name: 'Extracting', description: 'OCR and data extraction' },
@@ -413,11 +437,11 @@ function ProcessingScreen({ currentStep, totalDocs }: { currentStep: number; tot
   const progress = ((currentStep + 1) / steps.length) * 100
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
-      <Card className="w-full max-w-2xl bg-slate-800 border-slate-700">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
+      <Card className="w-full max-w-2xl bg-white border-gray-200">
         <CardHeader className="text-center">
-          <CardTitle className="text-white text-2xl">Processing Wire Packet</CardTitle>
-          <CardDescription className="text-slate-400">
+          <CardTitle className="text-gray-900 text-2xl">Processing Wire Packet</CardTitle>
+          <CardDescription className="text-gray-600">
             Processing Document {Math.min(currentStep + 1, totalDocs)} of {totalDocs}...
           </CardDescription>
         </CardHeader>
@@ -437,28 +461,28 @@ function ProcessingScreen({ currentStep, totalDocs }: { currentStep: number; tot
                       isComplete
                         ? 'bg-emerald-500 border-emerald-500'
                         : isActive
-                        ? 'border-blue-500 bg-blue-500/10'
-                        : 'border-slate-600 bg-slate-900'
+                        ? 'border-black bg-gray-100'
+                        : 'border-gray-300 bg-white'
                     )}
                   >
                     {isComplete ? (
                       <CheckCircle2 className="h-5 w-5 text-white" />
                     ) : isActive ? (
-                      <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                      <Loader2 className="h-5 w-5 text-black animate-spin" />
                     ) : (
-                      <span className="text-slate-500">{index + 1}</span>
+                      <span className="text-gray-400">{index + 1}</span>
                     )}
                   </div>
                   <div className="flex-1">
                     <p
                       className={cn(
                         'font-medium',
-                        isActive || isComplete ? 'text-white' : 'text-slate-500'
+                        isActive || isComplete ? 'text-gray-900' : 'text-gray-400'
                       )}
                     >
                       {step.name}
                     </p>
-                    <p className="text-sm text-slate-400">{step.description}</p>
+                    <p className="text-sm text-gray-500">{step.description}</p>
                   </div>
                 </div>
               )
@@ -470,26 +494,56 @@ function ProcessingScreen({ currentStep, totalDocs }: { currentStep: number; tot
   )
 }
 
-// Component: Dashboard Screen
-function DashboardScreen({
+// Component: Empty State
+function EmptyState({ onOpenModal }: { onOpenModal: () => void }) {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <Card className="w-full max-w-lg bg-white border-gray-200 text-center">
+        <CardHeader className="pb-4">
+          <div className="flex justify-center mb-4">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
+              <FolderOpen className="h-10 w-10 text-gray-400" />
+            </div>
+          </div>
+          <CardTitle className="text-gray-900 text-2xl">No Verifications Yet</CardTitle>
+          <CardDescription className="text-gray-600 text-base">
+            Start your first wire packet verification to get started
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            onClick={onOpenModal}
+            className="bg-black hover:bg-gray-800 text-white"
+            size="lg"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Start Verification
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// Component: Verification Detail View
+function VerificationDetailView({
   result,
-  onReset,
   clerkNotes,
-  onClerkNotesChange
+  onClerkNotesChange,
+  onBack
 }: {
   result: WireVerificationResponse
-  onReset: () => void
   clerkNotes: string
   onClerkNotesChange: (notes: string) => void
+  onBack: () => void
 }) {
-  // Add defensive checks for nested properties
   if (!result?.result?.validation_results || !result?.result?.extraction_results) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
-        <Card className="w-full max-w-md bg-slate-800 border-slate-700">
+      <div className="flex items-center justify-center p-12">
+        <Card className="w-full max-w-md bg-white border-gray-200">
           <CardHeader>
-            <CardTitle className="text-white">Loading Results...</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardTitle className="text-gray-900">Loading Results...</CardTitle>
+            <CardDescription className="text-gray-600">
               Please wait while we process the verification data
             </CardDescription>
           </CardHeader>
@@ -500,413 +554,485 @@ function DashboardScreen({
 
   const { validation_results, extraction_results, final_decision, processing_summary } = result.result
 
-  const packetId = `WP-${new Date().getTime().toString().slice(-8)}`
-
-  const overallStatusColor = {
-    PASS: 'bg-emerald-500',
-    FAIL: 'bg-red-500',
-    FLAG: 'bg-amber-500'
-  }[validation_results.overall_validation_status]
-
   return (
-    <div className="min-h-screen bg-slate-900">
-      {/* Top Navigation Bar */}
-      <div className={cn('border-b border-slate-800', overallStatusColor)}>
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onReset}
-                className="text-white hover:bg-white/10"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                New Packet
-              </Button>
-              <Separator orientation="vertical" className="h-6 bg-white/20" />
-              <div>
-                <p className="text-xs text-white/70">Packet ID</p>
-                <p className="text-sm font-semibold text-white">{packetId}</p>
-              </div>
+    <div className="space-y-6">
+      {/* Back Button */}
+      <Button
+        variant="ghost"
+        onClick={onBack}
+        className="text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to Dashboard
+      </Button>
+
+      {/* Header Stats */}
+      <div className="grid grid-cols-4 gap-4">
+        <Card className="bg-white border-gray-200">
+          <CardHeader className="pb-3">
+            <CardDescription className="text-gray-500 text-xs uppercase">Status</CardDescription>
+            <div className="pt-1">
+              <StatusBadge status={validation_results.overall_validation_status} />
             </div>
-            <StatusBadge status={validation_results.overall_validation_status} />
+          </CardHeader>
+        </Card>
+        <Card className="bg-white border-gray-200">
+          <CardHeader className="pb-3">
+            <CardDescription className="text-gray-500 text-xs uppercase">Documents</CardDescription>
+            <CardTitle className="text-gray-900 text-2xl">
+              {processing_summary.total_documents_processed}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <Card className="bg-white border-gray-200">
+          <CardHeader className="pb-3">
+            <CardDescription className="text-gray-500 text-xs uppercase">Confidence</CardDescription>
+            <CardTitle className="text-gray-900 text-2xl">
+              {(processing_summary.extraction_confidence * 100).toFixed(0)}%
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <Card className="bg-white border-gray-200">
+          <CardHeader className="pb-3">
+            <CardDescription className="text-gray-500 text-xs uppercase">Issues</CardDescription>
+            <CardTitle className="text-red-600 text-2xl">
+              {processing_summary.critical_issues_count}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Validation Summary */}
+          <Card className="bg-white border-gray-200">
+            <CardHeader>
+              <CardTitle className="text-gray-900">Validation Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-4 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500 uppercase mb-1">Total Rules</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {validation_results.validation_summary.total_rules_checked}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase mb-1">Passed</p>
+                  <p className="text-2xl font-bold text-emerald-600">
+                    {validation_results.validation_summary.passed}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase mb-1">Failed</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {validation_results.validation_summary.failed}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase mb-1">Flagged</p>
+                  <p className="text-2xl font-bold text-amber-600">
+                    {validation_results.validation_summary.flagged}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Validation Rules */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold text-gray-900">Validation Rules</h2>
+            {validation_results.validation_rules.map((rule, index) => (
+              <ValidationRuleCard key={index} rule={rule} />
+            ))}
+          </div>
+
+          {/* Compliance Checks */}
+          <Card className="bg-white border-gray-200">
+            <CardHeader>
+              <CardTitle className="text-gray-900">Compliance Checks</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Signature Requirements</p>
+                  <p className="text-xs text-gray-600">
+                    Found {validation_results.compliance_checks.signature_requirements.found} of{' '}
+                    {validation_results.compliance_checks.signature_requirements.required} required
+                  </p>
+                </div>
+                <StatusBadge
+                  status={
+                    validation_results.compliance_checks.signature_requirements.status as 'PASS' | 'FAIL' | 'FLAG'
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Amount Limits</p>
+                  <p className="text-xs text-gray-600">
+                    Transfer: ${validation_results.compliance_checks.amount_limits.transfer_amount.toLocaleString()}
+                  </p>
+                </div>
+                <StatusBadge
+                  status={validation_results.compliance_checks.amount_limits.status as 'PASS' | 'FAIL' | 'FLAG'}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Account Verification</p>
+                  <p className="text-xs text-gray-600">
+                    {validation_results.compliance_checks.account_verification.accounts_validated} accounts validated
+                  </p>
+                </div>
+                <StatusBadge
+                  status={
+                    validation_results.compliance_checks.account_verification.consistency_check as
+                      | 'PASS'
+                      | 'FAIL'
+                      | 'FLAG'
+                  }
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recommendations */}
+          {validation_results.recommendations.length > 0 && (
+            <Card className="bg-white border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-gray-900">Recommendations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {validation_results.recommendations.map((rec, index) => (
+                    <li key={index} className="flex gap-2 text-sm text-gray-700">
+                      <span className="text-blue-600 flex-shrink-0">{index + 1}.</span>
+                      <span>{rec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Extracted Data Table */}
+          <Card className="bg-white border-gray-200">
+            <CardHeader>
+              <CardTitle className="text-gray-900">Extracted Data Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="w-full">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-gray-200 hover:bg-gray-50">
+                      <TableHead className="text-gray-700">Document</TableHead>
+                      <TableHead className="text-gray-700">Account</TableHead>
+                      <TableHead className="text-gray-700">Routing</TableHead>
+                      <TableHead className="text-gray-700">Amount</TableHead>
+                      <TableHead className="text-gray-700">Beneficiary</TableHead>
+                      <TableHead className="text-gray-700">Originator</TableHead>
+                      <TableHead className="text-gray-700">Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {extraction_results.extracted_data.map((doc, index) => (
+                      <TableRow key={index} className="border-gray-200 hover:bg-gray-50">
+                        <TableCell className="text-gray-900 font-medium">{doc.file_name}</TableCell>
+                        <TableCell>
+                          <div className="space-y-0.5">
+                            <p className="text-sm text-gray-900">{doc.extracted_data.account_number.value || '-'}</p>
+                            {doc.extracted_data.account_number.confidence > 0 && (
+                              <p className="text-xs text-gray-500">
+                                {(doc.extracted_data.account_number.confidence * 100).toFixed(0)}% conf
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-0.5">
+                            <p className="text-sm text-gray-900">{doc.extracted_data.routing_number.value || '-'}</p>
+                            {doc.extracted_data.routing_number.confidence > 0 && (
+                              <p className="text-xs text-gray-500">
+                                {(doc.extracted_data.routing_number.confidence * 100).toFixed(0)}% conf
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-0.5">
+                            <p className="text-sm text-gray-900">
+                              {doc.extracted_data.transfer_amount.value
+                                ? `$${Number(doc.extracted_data.transfer_amount.value).toLocaleString()}`
+                                : '-'}
+                            </p>
+                            {doc.extracted_data.transfer_amount.confidence > 0 && (
+                              <p className="text-xs text-gray-500">
+                                {(doc.extracted_data.transfer_amount.confidence * 100).toFixed(0)}% conf
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-0.5">
+                            <p className="text-sm text-gray-900">{doc.extracted_data.beneficiary_name.value || '-'}</p>
+                            {doc.extracted_data.beneficiary_name.confidence > 0 && (
+                              <p className="text-xs text-gray-500">
+                                {(doc.extracted_data.beneficiary_name.confidence * 100).toFixed(0)}% conf
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-0.5">
+                            <p className="text-sm text-gray-900">{doc.extracted_data.originator_name.value || '-'}</p>
+                            {doc.extracted_data.originator_name.confidence > 0 && (
+                              <p className="text-xs text-gray-500">
+                                {(doc.extracted_data.originator_name.confidence * 100).toFixed(0)}% conf
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-0.5">
+                            <p className="text-sm text-gray-900">{doc.extracted_data.date.value || '-'}</p>
+                            {doc.extracted_data.date.confidence > 0 && (
+                              <p className="text-xs text-gray-500">
+                                {(doc.extracted_data.date.confidence * 100).toFixed(0)}% conf
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Final Decision */}
+          <Card className="bg-white border-gray-200">
+            <CardHeader>
+              <CardTitle className="text-gray-900">Final Decision</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md">
+                <span className="text-sm font-medium text-gray-900">Approved</span>
+                <span className={cn('text-sm font-bold', final_decision.approved ? 'text-emerald-600' : 'text-red-600')}>
+                  {final_decision.approved ? 'YES' : 'NO'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md">
+                <span className="text-sm font-medium text-gray-900">Manual Review</span>
+                <span className={cn('text-sm font-bold', final_decision.requires_manual_review ? 'text-amber-600' : 'text-emerald-600')}>
+                  {final_decision.requires_manual_review ? 'REQUIRED' : 'NOT REQUIRED'}
+                </span>
+              </div>
+
+              {final_decision.blocking_issues.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-red-600 uppercase">Blocking Issues</p>
+                  <ul className="space-y-1.5">
+                    {final_decision.blocking_issues.map((issue, index) => (
+                      <li key={index} className="flex gap-2 text-xs text-gray-700">
+                        <XCircle className="h-3.5 w-3.5 text-red-600 flex-shrink-0 mt-0.5" />
+                        <span>{issue}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {final_decision.warnings.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-amber-600 uppercase">Warnings</p>
+                  <ul className="space-y-1.5">
+                    {final_decision.warnings.map((warning, index) => (
+                      <li key={index} className="flex gap-2 text-xs text-gray-700">
+                        <AlertTriangle className="h-3.5 w-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
+                        <span>{warning}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Extracted Documents */}
+          <Card className="bg-white border-gray-200">
+            <CardHeader>
+              <CardTitle className="text-gray-900">Extracted Documents</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-96">
+                <div className="space-y-3 pr-4">
+                  {extraction_results.extracted_data.map((doc, index) => (
+                    <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded-md">
+                      <div className="flex items-start gap-2 mb-2">
+                        <FileIcon fileName={doc.file_name} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{doc.file_name}</p>
+                          <p className="text-xs text-gray-600 capitalize">
+                            {doc.document_type.replace(/_/g, ' ')}
+                          </p>
+                        </div>
+                      </div>
+
+                      <Separator className="bg-gray-200 my-2" />
+
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-600">Clarity</span>
+                          <span className="text-gray-900">
+                            {(doc.document_quality.clarity * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-600">Completeness</span>
+                          <span className="text-gray-900">
+                            {(doc.document_quality.completeness * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-600">Signatures</span>
+                          <span className="text-gray-900">{doc.signature_detection.signatures_found}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          {/* Clerk Notes */}
+          <Card className="bg-white border-gray-200">
+            <CardHeader>
+              <CardTitle className="text-gray-900">Clerk Notes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                value={clerkNotes}
+                onChange={(e) => onClerkNotesChange(e.target.value)}
+                placeholder="Add any additional notes or observations..."
+                className="min-h-32 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
+              />
+            </CardContent>
+          </Card>
+
+          {/* Action Buttons */}
+          <div className="space-y-3">
+            <Button
+              disabled={!final_decision.approved}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+              size="lg"
+            >
+              Submit to Wires
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full border-gray-300 text-gray-700 hover:bg-gray-100"
+              size="lg"
+            >
+              Return for Correction
+            </Button>
           </div>
         </div>
       </div>
+    </div>
+  )
+}
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Summary Stats */}
-            <div className="grid grid-cols-3 gap-4">
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-slate-400 text-xs">Documents</CardDescription>
-                  <CardTitle className="text-white text-2xl">
-                    {processing_summary.total_documents_processed}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-slate-400 text-xs">Extraction Confidence</CardDescription>
-                  <CardTitle className="text-white text-2xl">
-                    {(processing_summary.extraction_confidence * 100).toFixed(0)}%
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-slate-400 text-xs">Critical Issues</CardDescription>
-                  <CardTitle className="text-red-400 text-2xl">
-                    {processing_summary.critical_issues_count}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-            </div>
+// Component: Dashboard List View
+function DashboardListView({
+  results,
+  onSelectResult,
+  onOpenModal
+}: {
+  results: Array<{ id: string; result: WireVerificationResponse; timestamp: string }>
+  onSelectResult: (id: string) => void
+  onOpenModal: () => void
+}) {
+  if (results.length === 0) {
+    return <EmptyState onOpenModal={onOpenModal} />
+  }
 
-            {/* Validation Summary */}
-            <Card className="bg-slate-800 border-slate-700">
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Wire Verifications</h2>
+          <p className="text-gray-600">View and manage wire packet verifications</p>
+        </div>
+        <Button onClick={onOpenModal} className="bg-black hover:bg-gray-800 text-white">
+          <Plus className="h-4 w-4 mr-2" />
+          New Verification
+        </Button>
+      </div>
+
+      <div className="grid gap-4">
+        {results.map((item) => {
+          const { result } = item
+          const validation_results = result.result.validation_results
+          const processing_summary = result.result.processing_summary
+
+          return (
+            <Card
+              key={item.id}
+              className="bg-white border-gray-200 hover:border-gray-300 cursor-pointer transition-colors"
+              onClick={() => onSelectResult(item.id)}
+            >
               <CardHeader>
-                <CardTitle className="text-white">Validation Summary</CardTitle>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <CardTitle className="text-gray-900">Packet {item.id}</CardTitle>
+                      <StatusBadge status={validation_results.overall_validation_status} />
+                    </div>
+                    <CardDescription className="text-gray-600">
+                      Processed {new Date(item.timestamp).toLocaleString()}
+                    </CardDescription>
+                  </div>
+                  <PackageSearch className="h-5 w-5 text-gray-400" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-4 gap-4 text-sm">
                   <div>
-                    <p className="text-xs text-slate-400 uppercase mb-1">Total Rules</p>
-                    <p className="text-2xl font-bold text-white">
-                      {validation_results.validation_summary.total_rules_checked}
+                    <p className="text-gray-600 text-xs">Documents</p>
+                    <p className="text-gray-900 font-semibold">
+                      {processing_summary.total_documents_processed}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 uppercase mb-1">Passed</p>
-                    <p className="text-2xl font-bold text-emerald-500">
+                    <p className="text-gray-600 text-xs">Confidence</p>
+                    <p className="text-gray-900 font-semibold">
+                      {(processing_summary.extraction_confidence * 100).toFixed(0)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-xs">Rules Passed</p>
+                    <p className="text-emerald-600 font-semibold">
                       {validation_results.validation_summary.passed}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 uppercase mb-1">Failed</p>
-                    <p className="text-2xl font-bold text-red-500">
-                      {validation_results.validation_summary.failed}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400 uppercase mb-1">Flagged</p>
-                    <p className="text-2xl font-bold text-amber-500">
-                      {validation_results.validation_summary.flagged}
+                    <p className="text-gray-600 text-xs">Issues</p>
+                    <p className="text-red-600 font-semibold">
+                      {processing_summary.critical_issues_count}
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Validation Rules */}
-            <div className="space-y-3">
-              <h2 className="text-xl font-bold text-white">Validation Rules</h2>
-              {validation_results.validation_rules.map((rule, index) => (
-                <ValidationRuleCard key={index} rule={rule} />
-              ))}
-            </div>
-
-            {/* Compliance Checks */}
-            <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white">Compliance Checks</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-slate-900/50 border border-slate-700 rounded-md">
-                  <div>
-                    <p className="text-sm font-medium text-white">Signature Requirements</p>
-                    <p className="text-xs text-slate-400">
-                      Found {validation_results.compliance_checks.signature_requirements.found} of{' '}
-                      {validation_results.compliance_checks.signature_requirements.required} required
-                    </p>
-                  </div>
-                  <StatusBadge
-                    status={
-                      validation_results.compliance_checks.signature_requirements.status as 'PASS' | 'FAIL' | 'FLAG'
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between p-3 bg-slate-900/50 border border-slate-700 rounded-md">
-                  <div>
-                    <p className="text-sm font-medium text-white">Amount Limits</p>
-                    <p className="text-xs text-slate-400">
-                      Transfer: ${validation_results.compliance_checks.amount_limits.transfer_amount.toLocaleString()}
-                    </p>
-                  </div>
-                  <StatusBadge
-                    status={validation_results.compliance_checks.amount_limits.status as 'PASS' | 'FAIL' | 'FLAG'}
-                  />
-                </div>
-                <div className="flex items-center justify-between p-3 bg-slate-900/50 border border-slate-700 rounded-md">
-                  <div>
-                    <p className="text-sm font-medium text-white">Account Verification</p>
-                    <p className="text-xs text-slate-400">
-                      {validation_results.compliance_checks.account_verification.accounts_validated} accounts validated
-                    </p>
-                  </div>
-                  <StatusBadge
-                    status={
-                      validation_results.compliance_checks.account_verification.consistency_check as
-                        | 'PASS'
-                        | 'FAIL'
-                        | 'FLAG'
-                    }
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recommendations */}
-            {validation_results.recommendations.length > 0 && (
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-white">Recommendations</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {validation_results.recommendations.map((rec, index) => (
-                      <li key={index} className="flex gap-2 text-sm text-slate-300">
-                        <span className="text-blue-400 flex-shrink-0">{index + 1}.</span>
-                        <span>{rec}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Final Decision */}
-            <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white">Final Decision</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-slate-900/50 border border-slate-700 rounded-md">
-                  <span className="text-sm font-medium text-white">Approved</span>
-                  <span className={cn('text-sm font-bold', final_decision.approved ? 'text-emerald-500' : 'text-red-500')}>
-                    {final_decision.approved ? 'YES' : 'NO'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-slate-900/50 border border-slate-700 rounded-md">
-                  <span className="text-sm font-medium text-white">Manual Review</span>
-                  <span className={cn('text-sm font-bold', final_decision.requires_manual_review ? 'text-amber-500' : 'text-emerald-500')}>
-                    {final_decision.requires_manual_review ? 'REQUIRED' : 'NOT REQUIRED'}
-                  </span>
-                </div>
-
-                {final_decision.blocking_issues.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold text-red-400 uppercase">Blocking Issues</p>
-                    <ul className="space-y-1.5">
-                      {final_decision.blocking_issues.map((issue, index) => (
-                        <li key={index} className="flex gap-2 text-xs text-slate-300">
-                          <XCircle className="h-3.5 w-3.5 text-red-500 flex-shrink-0 mt-0.5" />
-                          <span>{issue}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {final_decision.warnings.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold text-amber-400 uppercase">Warnings</p>
-                    <ul className="space-y-1.5">
-                      {final_decision.warnings.map((warning, index) => (
-                        <li key={index} className="flex gap-2 text-xs text-slate-300">
-                          <AlertTriangle className="h-3.5 w-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
-                          <span>{warning}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Extracted Documents */}
-            <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white">Extracted Documents</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-96">
-                  <div className="space-y-3 pr-4">
-                    {extraction_results.extracted_data.map((doc, index) => (
-                      <div key={index} className="p-3 bg-slate-900/50 border border-slate-700 rounded-md">
-                        <div className="flex items-start gap-2 mb-2">
-                          <FileIcon fileName={doc.file_name} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate">{doc.file_name}</p>
-                            <p className="text-xs text-slate-400 capitalize">
-                              {doc.document_type.replace(/_/g, ' ')}
-                            </p>
-                          </div>
-                        </div>
-
-                        <Separator className="bg-slate-700 my-2" />
-
-                        <div className="space-y-1.5">
-                          <div className="flex justify-between text-xs">
-                            <span className="text-slate-400">Clarity</span>
-                            <span className="text-white">
-                              {(doc.document_quality.clarity * 100).toFixed(0)}%
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-xs">
-                            <span className="text-slate-400">Completeness</span>
-                            <span className="text-white">
-                              {(doc.document_quality.completeness * 100).toFixed(0)}%
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-xs">
-                            <span className="text-slate-400">Signatures</span>
-                            <span className="text-white">{doc.signature_detection.signatures_found}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-
-            {/* Clerk Notes */}
-            <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white">Clerk Notes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Textarea
-                  value={clerkNotes}
-                  onChange={(e) => onClerkNotesChange(e.target.value)}
-                  placeholder="Add any additional notes or observations..."
-                  className="min-h-32 bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
-                />
-              </CardContent>
-            </Card>
-
-            {/* Action Buttons */}
-            <div className="space-y-3">
-              <Button
-                disabled={!final_decision.approved}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                size="lg"
-              >
-                Submit to Wires
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full border-slate-600 text-slate-300 hover:bg-slate-700"
-                size="lg"
-              >
-                Return for Correction
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Extracted Data Table (at bottom) */}
-        <Card className="mt-6 bg-slate-800 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white">Extracted Data Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="w-full">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-slate-700 hover:bg-slate-700/50">
-                    <TableHead className="text-slate-300">Document</TableHead>
-                    <TableHead className="text-slate-300">Account</TableHead>
-                    <TableHead className="text-slate-300">Routing</TableHead>
-                    <TableHead className="text-slate-300">Amount</TableHead>
-                    <TableHead className="text-slate-300">Beneficiary</TableHead>
-                    <TableHead className="text-slate-300">Originator</TableHead>
-                    <TableHead className="text-slate-300">Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {extraction_results.extracted_data.map((doc, index) => (
-                    <TableRow key={index} className="border-slate-700 hover:bg-slate-700/50">
-                      <TableCell className="text-white font-medium">{doc.file_name}</TableCell>
-                      <TableCell>
-                        <div className="space-y-0.5">
-                          <p className="text-sm text-white">{doc.extracted_data.account_number.value || '-'}</p>
-                          {doc.extracted_data.account_number.confidence > 0 && (
-                            <p className="text-xs text-slate-400">
-                              {(doc.extracted_data.account_number.confidence * 100).toFixed(0)}% conf
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-0.5">
-                          <p className="text-sm text-white">{doc.extracted_data.routing_number.value || '-'}</p>
-                          {doc.extracted_data.routing_number.confidence > 0 && (
-                            <p className="text-xs text-slate-400">
-                              {(doc.extracted_data.routing_number.confidence * 100).toFixed(0)}% conf
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-0.5">
-                          <p className="text-sm text-white">
-                            {doc.extracted_data.transfer_amount.value
-                              ? `$${Number(doc.extracted_data.transfer_amount.value).toLocaleString()}`
-                              : '-'}
-                          </p>
-                          {doc.extracted_data.transfer_amount.confidence > 0 && (
-                            <p className="text-xs text-slate-400">
-                              {(doc.extracted_data.transfer_amount.confidence * 100).toFixed(0)}% conf
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-0.5">
-                          <p className="text-sm text-white">{doc.extracted_data.beneficiary_name.value || '-'}</p>
-                          {doc.extracted_data.beneficiary_name.confidence > 0 && (
-                            <p className="text-xs text-slate-400">
-                              {(doc.extracted_data.beneficiary_name.confidence * 100).toFixed(0)}% conf
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-0.5">
-                          <p className="text-sm text-white">{doc.extracted_data.originator_name.value || '-'}</p>
-                          {doc.extracted_data.originator_name.confidence > 0 && (
-                            <p className="text-xs text-slate-400">
-                              {(doc.extracted_data.originator_name.confidence * 100).toFixed(0)}% conf
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-0.5">
-                          <p className="text-sm text-white">{doc.extracted_data.date.value || '-'}</p>
-                          {doc.extracted_data.date.confidence > 0 && (
-                            <p className="text-xs text-slate-400">
-                              {(doc.extracted_data.date.confidence * 100).toFixed(0)}% conf
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
-          </CardContent>
-        </Card>
+          )
+        })}
       </div>
     </div>
   )
@@ -914,44 +1040,42 @@ function DashboardScreen({
 
 // Main Home Component
 export default function Home() {
-  const [screen, setScreen] = useState<Screen>('upload')
+  const [view, setView] = useState<View>('list')
+  const [verifications, setVerifications] = useState<StoredVerification[]>([])
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [files, setFiles] = useState<UploadedFile[]>([])
+  const [isProcessing, setIsProcessing] = useState(false)
   const [processingStep, setProcessingStep] = useState(0)
-  const [result, setResult] = useState<WireVerificationResponse | null>(null)
-  const [clerkNotes, setClerkNotes] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const selectedVerification = selectedId
+    ? verifications.find(v => v.id === selectedId)
+    : null
 
   const handleProcess = async () => {
     setError(null)
-    setScreen('processing')
+    setIsProcessing(true)
     setProcessingStep(0)
 
     // Simulate processing steps
     const simulateSteps = async () => {
-      // Step 1: Extracting
       setProcessingStep(0)
       await new Promise(resolve => setTimeout(resolve, 1500))
-
-      // Step 2: Validating
       setProcessingStep(1)
       await new Promise(resolve => setTimeout(resolve, 1500))
-
-      // Step 3: Complete
       setProcessingStep(2)
       await new Promise(resolve => setTimeout(resolve, 1000))
     }
 
     try {
-      // Run simulation
       await simulateSteps()
 
-      // Create message with file information
       const fileList = files.map(f => f.file.name).join(', ')
       const message = `Process wire packet with ${files.length} documents: ${fileList}. Perform complete OCR extraction and validation.`
 
       console.log('Calling Wire Verification Manager with message:', message)
 
-      // Call the Wire Verification Manager agent with timeout
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Agent request timeout after 30 seconds')), 30000)
       )
@@ -964,7 +1088,6 @@ export default function Home() {
       console.log('Agent Response Received:', response)
 
       if (response.success && response.response) {
-        // Transform the normalized response to our expected structure
         const wireResponse: WireVerificationResponse = {
           status: response.response.status,
           result: response.response.result as WireVerificationResult,
@@ -976,69 +1099,118 @@ export default function Home() {
           }
         }
 
-        // Validate that we have the required structure
         if (!wireResponse.result?.validation_results || !wireResponse.result?.extraction_results) {
           console.warn('Response missing required fields, using structured fallback')
           throw new Error('Invalid response structure from agent')
         }
 
-        console.log('Setting result and navigating to dashboard')
-        setResult(wireResponse)
-        setScreen('dashboard')
+        console.log('Verification complete, adding to list')
+
+        // Create new verification record
+        const newVerification: StoredVerification = {
+          id: `WP-${new Date().getTime().toString().slice(-8)}`,
+          result: wireResponse,
+          timestamp: new Date().toISOString(),
+          clerkNotes: ''
+        }
+
+        setVerifications(prev => [newVerification, ...prev])
+        setSelectedId(newVerification.id)
+        setView('detail')
+        setFiles([])
+        setIsProcessing(false)
       } else {
         const errorMsg = response.error || response.response?.message || 'Agent processing failed'
         console.error('Agent returned error:', errorMsg)
         setError(errorMsg)
-        setScreen('upload')
+        setIsProcessing(false)
       }
     } catch (err) {
       console.error('Exception during processing:', err)
       const errorMessage = err instanceof Error ? err.message : 'Processing error occurred'
       setError(errorMessage)
-      setScreen('upload')
+      setIsProcessing(false)
     }
   }
 
-  const handleReset = () => {
-    setScreen('upload')
-    setFiles([])
-    setResult(null)
-    setClerkNotes('')
-    setError(null)
+  const handleSelectResult = (id: string) => {
+    setSelectedId(id)
+    setView('detail')
   }
 
-  if (screen === 'upload') {
-    return (
-      <>
-        <UploadScreen
-          files={files}
-          onFilesChange={setFiles}
-          onProcess={handleProcess}
-          isProcessing={false}
-        />
-        {error && (
-          <div className="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-md shadow-lg">
-            {error}
-          </div>
+  const handleBackToList = () => {
+    setView('list')
+    setSelectedId(null)
+  }
+
+  const handleClerkNotesChange = (notes: string) => {
+    if (selectedId) {
+      setVerifications(prev =>
+        prev.map(v => (v.id === selectedId ? { ...v, clerkNotes: notes } : v))
+      )
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-black border-b border-gray-800">
+        <div className="container mx-auto px-6 py-4">
+          <h1 className="text-xl font-bold text-white">Wire Verification Command Center</h1>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-8">
+        {view === 'list' && (
+          <DashboardListView
+            results={verifications}
+            onSelectResult={handleSelectResult}
+            onOpenModal={() => setIsModalOpen(true)}
+          />
         )}
-      </>
-    )
-  }
 
-  if (screen === 'processing') {
-    return <ProcessingScreen currentStep={processingStep} totalDocs={files.length} />
-  }
+        {view === 'detail' && selectedVerification && (
+          <VerificationDetailView
+            result={selectedVerification.result}
+            clerkNotes={selectedVerification.clerkNotes}
+            onClerkNotesChange={handleClerkNotesChange}
+            onBack={handleBackToList}
+          />
+        )}
+      </main>
 
-  if (screen === 'dashboard' && result) {
-    return (
-      <DashboardScreen
-        result={result}
-        onReset={handleReset}
-        clerkNotes={clerkNotes}
-        onClerkNotesChange={setClerkNotes}
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        files={files}
+        onFilesChange={setFiles}
+        onProcess={handleProcess}
+        isProcessing={isProcessing}
       />
-    )
-  }
 
-  return null
+      {/* Processing Screen Overlay */}
+      {isProcessing && <ProcessingScreen currentStep={processingStep} totalDocs={files.length} />}
+
+      {/* Error Toast */}
+      {error && (
+        <div className="fixed bottom-4 right-4 bg-red-600 text-white px-6 py-3 rounded-md shadow-lg max-w-md">
+          <div className="flex items-start gap-3">
+            <XCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">Error</p>
+              <p className="text-sm">{error}</p>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="ml-auto text-white hover:text-gray-200"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
