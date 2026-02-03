@@ -926,7 +926,7 @@ export default function Home() {
     setScreen('processing')
     setProcessingStep(0)
 
-    // Simulate processing steps with real agent call
+    // Simulate processing steps
     const simulateSteps = async () => {
       // Step 1: Extracting
       setProcessingStep(0)
@@ -942,28 +942,59 @@ export default function Home() {
     }
 
     try {
-      // Run simulation alongside the actual agent call
-      const simulationPromise = simulateSteps()
+      // Run simulation
+      await simulateSteps()
 
       // Create message with file information
       const fileList = files.map(f => f.file.name).join(', ')
-      const message = `Process wire packet with ${files.length} documents: ${fileList}. Wire amount: $250,000 to account 9876543210.`
+      const message = `Process wire packet with ${files.length} documents: ${fileList}. Perform complete OCR extraction and validation.`
 
-      // Call the Wire Verification Manager agent
-      const response = await callAIAgent(message, WIRE_VERIFICATION_MANAGER_AGENT_ID)
+      console.log('Calling Wire Verification Manager with message:', message)
 
-      // Wait for simulation to complete
-      await simulationPromise
+      // Call the Wire Verification Manager agent with timeout
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Agent request timeout after 30 seconds')), 30000)
+      )
 
-      if (response.success && response.response.status === 'success') {
-        setResult(response.response as WireVerificationResponse)
+      const response = await Promise.race([
+        callAIAgent(message, WIRE_VERIFICATION_MANAGER_AGENT_ID),
+        timeoutPromise
+      ])
+
+      console.log('Agent Response Received:', response)
+
+      if (response.success && response.response) {
+        // Transform the normalized response to our expected structure
+        const wireResponse: WireVerificationResponse = {
+          status: response.response.status,
+          result: response.response.result as WireVerificationResult,
+          metadata: response.response.metadata || {
+            agent_name: 'Wire Verification Manager',
+            timestamp: new Date().toISOString(),
+            total_processing_time_ms: 0,
+            sub_agents_invoked: ['Multi-Modal OCR & Extraction Agent', 'Validation & Verification Agent']
+          }
+        }
+
+        // Validate that we have the required structure
+        if (!wireResponse.result?.validation_results || !wireResponse.result?.extraction_results) {
+          console.warn('Response missing required fields, using structured fallback')
+          throw new Error('Invalid response structure from agent')
+        }
+
+        console.log('Setting result and navigating to dashboard')
+        setResult(wireResponse)
         setScreen('dashboard')
       } else {
-        setError(response.error || 'Processing failed')
+        const errorMsg = response.error || response.response?.message || 'Agent processing failed'
+        console.error('Agent returned error:', errorMsg)
+        setError(errorMsg)
         setScreen('upload')
       }
     } catch (err) {
-      setError('Network error occurred')
+      console.error('Exception during processing:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Processing error occurred'
+      setError(errorMessage)
       setScreen('upload')
     }
   }
