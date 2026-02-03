@@ -429,6 +429,7 @@ function UploadModal({
 // Component: Processing Screen (Modal Overlay)
 function ProcessingScreen({ currentStep, totalDocs }: { currentStep: number; totalDocs: number }) {
   const steps = [
+    { name: 'Uploading', description: 'Uploading documents to secure storage' },
     { name: 'Extracting', description: 'OCR and data extraction' },
     { name: 'Validating', description: 'Compliance rule checking' },
     { name: 'Complete', description: 'Finalizing results' }
@@ -553,6 +554,32 @@ function VerificationDetailView({
   }
 
   const { validation_results, extraction_results, final_decision, processing_summary } = result.result
+
+  // Additional safety check for compliance_checks
+  if (!validation_results?.compliance_checks) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Card className="w-full max-w-md bg-white border-gray-200">
+          <CardHeader>
+            <CardTitle className="text-gray-900">Processing Results...</CardTitle>
+            <CardDescription className="text-gray-600">
+              Validation data is incomplete. Please try processing again.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="outline"
+              onClick={onBack}
+              className="w-full"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -1058,34 +1085,42 @@ export default function Home() {
     setIsProcessing(true)
     setProcessingStep(0)
 
-    // Simulate processing steps
-    const simulateSteps = async () => {
-      setProcessingStep(0)
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      setProcessingStep(1)
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      setProcessingStep(2)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-    }
-
     try {
-      await simulateSteps()
+      // Step 1: Upload files to Lyzr
+      console.log('Step 1: Uploading files to Lyzr...')
+      const { uploadFiles } = await import('@/utils/aiAgent')
 
+      const uploadResult = await uploadFiles(files.map(f => f.file))
+
+      if (!uploadResult.success || uploadResult.asset_ids.length === 0) {
+        throw new Error(uploadResult.error || 'Failed to upload files')
+      }
+
+      console.log('Files uploaded successfully:', uploadResult.asset_ids)
+      setProcessingStep(1)
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Step 2: Call agent with uploaded files
       const fileList = files.map(f => f.file.name).join(', ')
       const message = `Process wire packet with ${files.length} documents: ${fileList}. Perform complete OCR extraction and validation.`
 
-      console.log('Calling Wire Verification Manager with message:', message)
+      console.log('Step 2: Calling Wire Verification Manager with message:', message)
+      console.log('With asset IDs:', uploadResult.asset_ids)
 
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Agent request timeout after 30 seconds')), 30000)
+        setTimeout(() => reject(new Error('Agent request timeout after 60 seconds')), 60000)
       )
 
       const response = await Promise.race([
-        callAIAgent(message, WIRE_VERIFICATION_MANAGER_AGENT_ID),
+        callAIAgent(message, WIRE_VERIFICATION_MANAGER_AGENT_ID, {
+          assets: uploadResult.asset_ids
+        }),
         timeoutPromise
       ])
 
       console.log('Agent Response Received:', response)
+      setProcessingStep(2)
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       if (response.success && response.response) {
         const wireResponse: WireVerificationResponse = {
