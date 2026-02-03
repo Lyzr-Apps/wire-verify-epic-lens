@@ -555,8 +555,11 @@ function VerificationDetailView({
 
   const { validation_results, extraction_results, final_decision, processing_summary } = result.result
 
-  // Additional safety check for compliance_checks
-  if (!validation_results?.compliance_checks) {
+  // Additional safety check for compliance_checks and nested properties
+  if (!validation_results?.compliance_checks ||
+      !validation_results.compliance_checks.signature_requirements ||
+      !validation_results.compliance_checks.amount_limits ||
+      !validation_results.compliance_checks.account_verification) {
     return (
       <div className="flex items-center justify-center p-12">
         <Card className="w-full max-w-md bg-white border-gray-200">
@@ -1006,8 +1009,13 @@ function DashboardListView({
       <div className="grid gap-4">
         {results.map((item) => {
           const { result } = item
-          const validation_results = result.result.validation_results
-          const processing_summary = result.result.processing_summary
+          const validation_results = result?.result?.validation_results
+          const processing_summary = result?.result?.processing_summary
+
+          // Skip rendering if data is incomplete
+          if (!validation_results || !processing_summary || !validation_results.validation_summary) {
+            return null
+          }
 
           return (
             <Card
@@ -1034,25 +1042,25 @@ function DashboardListView({
                   <div>
                     <p className="text-gray-600 text-xs">Documents</p>
                     <p className="text-gray-900 font-semibold">
-                      {processing_summary.total_documents_processed}
+                      {processing_summary.total_documents_processed || 0}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-600 text-xs">Confidence</p>
                     <p className="text-gray-900 font-semibold">
-                      {(processing_summary.extraction_confidence * 100).toFixed(0)}%
+                      {((processing_summary.extraction_confidence || 0) * 100).toFixed(0)}%
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-600 text-xs">Rules Passed</p>
                     <p className="text-emerald-600 font-semibold">
-                      {validation_results.validation_summary.passed}
+                      {validation_results.validation_summary.passed || 0}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-600 text-xs">Issues</p>
                     <p className="text-red-600 font-semibold">
-                      {processing_summary.critical_issues_count}
+                      {processing_summary.critical_issues_count || 0}
                     </p>
                   </div>
                 </div>
